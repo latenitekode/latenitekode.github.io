@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111b18">
+  <meta name="theme-color" content="#180e14">
   <title>বাজারের হিসাব | Shopping List</title>
   <meta name="description" content="বাজারের হিসাব রাখুন, মোট হিসাব দেখুন এবং • চিহ্নসহ তালিকা কপি করুন। JSON ব্যাকআপ ও ইমপোর্ট।">
   <meta property="og:type" content="website">
@@ -12,15 +12,15 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0b1210;
-      --panel: #14201c;
-      --panel-raised: #192923;
-      --line: #304239;
-      --text: #f1f8f3;
-      --muted: #a1b5a9;
-      --accent: #a5f0b9;
-      --accent-dark: #143622;
-      --danger: #f2a9a5;
+      --bg: #130c12;
+      --panel: #21141d;
+      --panel-raised: #2c1823;
+      --line: #573341;
+      --text: #fff3f4;
+      --muted: #cbaeb9;
+      --accent: #ff647c;
+      --accent-dark: #481724;
+      --danger: #ffacac;
       --shadow: 0 18px 45px rgba(0,0,0,.19);
     }
     * { box-sizing: border-box; }
@@ -28,7 +28,10 @@
       margin: 0;
       min-height: 100vh;
       font-family: "Noto Sans Bengali", "Hind Siliguri", "Vrinda", "Segoe UI", system-ui, sans-serif;
-      background: radial-gradient(circle at top right, #1c3428 0%, transparent 36%), var(--bg);
+      background:
+        radial-gradient(ellipse at 90% 0%, rgba(144, 32, 70, .32) 0%, transparent 41%),
+        radial-gradient(ellipse at 0% 100%, rgba(87, 17, 45, .19) 0%, transparent 38%),
+        var(--bg);
       color: var(--text);
       line-height: 1.55;
     }
@@ -40,17 +43,17 @@
     .eyebrow { color: var(--accent); font-size: .79rem; letter-spacing: .12em; font-weight: 750; margin: 0 0 6px; }
     h1 { font-size: clamp(1.7rem, 4vw, 2.55rem); line-height: 1.25; margin: 0 0 8px; letter-spacing: -.025em; }
     .subtitle { color: var(--muted); margin: 0; font-size: .95rem; }
-    .pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: #183025; color: #c5ecd0; padding: 7px 12px; border-radius: 99px; white-space: nowrap; font-size: .8rem; }
-    .dot { height: 7px; width: 7px; border-radius: 50%; background: #a7f5bd; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: #381924; color: #ffc4cc; padding: 7px 12px; border-radius: 99px; white-space: nowrap; font-size: .8rem; }
+    .dot { height: 7px; width: 7px; border-radius: 50%; background: #ff7087; }
     .layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(290px, .8fr); gap: 22px; align-items: start; }
     .panel { border: 1px solid var(--line); background: var(--panel); border-radius: 19px; box-shadow: var(--shadow); overflow: hidden; }
     .panel-header { padding: 22px 22px 17px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
     .panel-header h2 { margin: 0; font-size: 1.1rem; }
     .small { color: var(--muted); font-size: .83rem; }
     .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; padding: 0 22px 20px; }
-    label { display: block; color: #b5c9bc; font-weight: 650; font-size: .8rem; margin-bottom: 7px; }
-    .field { width: 100%; min-width: 0; background: #0e1814; border: 1px solid #395146; border-radius: 11px; padding: 12px 13px; color: var(--text); }
-    .field::placeholder { color: #6e8a79; }
+    label { display: block; color: #d3b4be; font-weight: 650; font-size: .8rem; margin-bottom: 7px; }
+    .field { width: 100%; min-width: 0; background: #170e16; border: 1px solid #66404e; border-radius: 11px; padding: 12px 13px; color: var(--text); }
+    .field::placeholder { color: #9d7988; }
     .divider { height: 1px; background: var(--line); }
     .items-header { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 19px 22px 9px; }
     .items-header h3 { font-size: .91rem; margin: 0; }
@@ -62,28 +65,28 @@
     .amount-wrap { position: relative; }
     .amount-wrap .field { padding-right: 27px; text-align: right; font-variant-numeric: tabular-nums; }
     .currency { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
-    .icon-btn { width: 35px; height: 39px; display: grid; place-items: center; border-radius: 10px; border: 1px solid transparent; background: transparent; color: #d5a9a3; transition: background .15s; font-size: 1.2rem; }
-    .icon-btn:hover { background: #4e2928; border-color: #78413c; }
-    .add { margin: 11px 22px 23px; background: transparent; border: 1px dashed #628571; color: var(--accent); padding: 10px 15px; border-radius: 11px; font-weight: 700; }
-    .add:hover { background: #20372a; }
+    .icon-btn { width: 35px; height: 39px; display: grid; place-items: center; border-radius: 10px; border: 1px solid transparent; background: transparent; color: #ffa7af; transition: background .15s; font-size: 1.2rem; }
+    .icon-btn:hover { background: #4e1d2c; border-color: #87364d; }
+    .add { margin: 11px 22px 23px; background: transparent; border: 1px dashed #ad526d; color: var(--accent); padding: 10px 15px; border-radius: 11px; font-weight: 700; }
+    .add:hover { background: #3e1d2c; }
     .total-wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--panel-raised); padding: 19px 22px; border-top: 1px solid var(--line); }
     .total-label { font-weight: 750; }
     .total { color: var(--accent); font-weight: 850; font-size: clamp(1.35rem, 3vw, 1.8rem); font-variant-numeric: tabular-nums; }
     .preview-panel { position: sticky; top: 18px; }
     .preview-intro { margin: -5px 22px 16px; color: var(--muted); font-size: .85rem; }
     .preview:empty::before { content: "নাম, মাস ও বাজারের আইটেম লিখুন। এখানে কপি করার লেখা দেখা যাবে।"; color: var(--muted); }
-    .preview { margin: 0 17px; background: #0b1510; border: 1px solid #2e4939; border-radius: 12px; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; font-size: .94rem; line-height: 1.9; min-height: 200px; max-height: 490px; overflow: auto; }
+    .preview { margin: 0 17px; background: #170e16; border: 1px solid #5e3447; border-radius: 12px; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; font-size: .94rem; line-height: 1.9; min-height: 200px; max-height: 490px; overflow: auto; }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 17px; }
-    .button { border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; background: #24372c; color: var(--text); font-weight: 750; flex: 1; transition: transform .1s, background .15s; }
+    .button { border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; background: #41202f; color: var(--text); font-weight: 750; flex: 1; transition: transform .1s, background .15s; }
     .button:active { transform: scale(.98); }
-    .primary { color: #102419; background: var(--accent); border-color: var(--accent); flex: 2; }
-    .primary:hover { background: #c0ffd0; }
-    .secondary:hover { background: #354d3d; }
+    .primary { color: #2b0e18; background: var(--accent); border-color: var(--accent); flex: 2; box-shadow: 0 4px 22px rgba(255, 100, 124, .15); }
+    .primary:hover { background: #ff8799; }
+    .secondary:hover { background: #583045; }
     .backup-actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 17px 17px; }
     .backup-actions .button { min-width: 130px; }
     .note { margin: 0 19px 19px; font-size: .78rem; color: var(--muted); }
-    .foot { text-align: center; color: #8da696; font-size: .8rem; margin-top: 24px; }
-    #toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 20px); background: #cfffd8; color: #132e1d; border-radius: 12px; padding: 11px 18px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; font-size: .9rem; font-weight: 750; box-shadow: 0 12px 32px #0008; z-index: 10; }
+    .foot { text-align: center; color: #b58d9f; font-size: .8rem; margin-top: 24px; }
+    #toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 20px); background: #ffd4db; color: #3b1420; border-radius: 12px; padding: 11px 18px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; font-size: .9rem; font-weight: 750; box-shadow: 0 12px 32px #0008; z-index: 10; }
     #toast.show { opacity: 1; transform: translate(-50%, 0); }
     @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } .preview-panel { position: static; } }
     @media (max-width: 490px) {
