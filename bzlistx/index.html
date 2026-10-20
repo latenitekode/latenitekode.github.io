@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111b18">
+  <title>বাজারের হিসাব | Shopping List</title>
+  <meta name="description" content="বাজারের হিসাব রাখুন, মোট হিসাব দেখুন এবং • চিহ্নসহ তালিকা কপি করুন। JSON ব্যাকআপ ও ইমপোর্ট।">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="বাজারের হিসাব · Shopping List">
+  <meta property="og:description" content="ফ্রি বাজার তালিকা: পণ্য, দাম, মোট হিসাব, কপি ও JSON ব্যাকআপ। কোনো লগইন লাগে না।">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1210;
+      --panel: #14201c;
+      --panel-raised: #192923;
+      --line: #304239;
+      --text: #f1f8f3;
+      --muted: #a1b5a9;
+      --accent: #a5f0b9;
+      --accent-dark: #143622;
+      --danger: #f2a9a5;
+      --shadow: 0 18px 45px rgba(0,0,0,.19);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans Bengali", "Hind Siliguri", "Vrinda", "Segoe UI", system-ui, sans-serif;
+      background: radial-gradient(circle at top right, #1c3428 0%, transparent 36%), var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .wrap { max-width: 1180px; padding: 32px 22px 70px; margin: auto; }
+    .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 24px; }
+    .eyebrow { color: var(--accent); font-size: .79rem; letter-spacing: .12em; font-weight: 750; margin: 0 0 6px; }
+    h1 { font-size: clamp(1.7rem, 4vw, 2.55rem); line-height: 1.25; margin: 0 0 8px; letter-spacing: -.025em; }
+    .subtitle { color: var(--muted); margin: 0; font-size: .95rem; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: #183025; color: #c5ecd0; padding: 7px 12px; border-radius: 99px; white-space: nowrap; font-size: .8rem; }
+    .dot { height: 7px; width: 7px; border-radius: 50%; background: #a7f5bd; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(290px, .8fr); gap: 22px; align-items: start; }
+    .panel { border: 1px solid var(--line); background: var(--panel); border-radius: 19px; box-shadow: var(--shadow); overflow: hidden; }
+    .panel-header { padding: 22px 22px 17px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .panel-header h2 { margin: 0; font-size: 1.1rem; }
+    .small { color: var(--muted); font-size: .83rem; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; padding: 0 22px 20px; }
+    label { display: block; color: #b5c9bc; font-weight: 650; font-size: .8rem; margin-bottom: 7px; }
+    .field { width: 100%; min-width: 0; background: #0e1814; border: 1px solid #395146; border-radius: 11px; padding: 12px 13px; color: var(--text); }
+    .field::placeholder { color: #6e8a79; }
+    .divider { height: 1px; background: var(--line); }
+    .items-header { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 19px 22px 9px; }
+    .items-header h3 { font-size: .91rem; margin: 0; }
+    #count { color: var(--muted); font-size: .8rem; }
+    .items { padding: 0 14px 0; }
+    .item-row { display: grid; grid-template-columns: 21px minmax(0, 1fr) 104px 35px; gap: 8px; align-items: center; padding: 7px 5px; }
+    .bullet { color: var(--accent); text-align: center; font-size: 1.25rem; user-select: none; }
+    .item-row .field { padding: 11px 10px; font-size: .91rem; }
+    .amount-wrap { position: relative; }
+    .amount-wrap .field { padding-right: 27px; text-align: right; font-variant-numeric: tabular-nums; }
+    .currency { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .icon-btn { width: 35px; height: 39px; display: grid; place-items: center; border-radius: 10px; border: 1px solid transparent; background: transparent; color: #d5a9a3; transition: background .15s; font-size: 1.2rem; }
+    .icon-btn:hover { background: #4e2928; border-color: #78413c; }
+    .add { margin: 11px 22px 23px; background: transparent; border: 1px dashed #628571; color: var(--accent); padding: 10px 15px; border-radius: 11px; font-weight: 700; }
+    .add:hover { background: #20372a; }
+    .total-wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--panel-raised); padding: 19px 22px; border-top: 1px solid var(--line); }
+    .total-label { font-weight: 750; }
+    .total { color: var(--accent); font-weight: 850; font-size: clamp(1.35rem, 3vw, 1.8rem); font-variant-numeric: tabular-nums; }
+    .preview-panel { position: sticky; top: 18px; }
+    .preview-intro { margin: -5px 22px 16px; color: var(--muted); font-size: .85rem; }
+    .preview:empty::before { content: "নাম, মাস ও বাজারের আইটেম লিখুন। এখানে কপি করার লেখা দেখা যাবে।"; color: var(--muted); }
+    .preview { margin: 0 17px; background: #0b1510; border: 1px solid #2e4939; border-radius: 12px; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; font-size: .94rem; line-height: 1.9; min-height: 200px; max-height: 490px; overflow: auto; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 17px; }
+    .button { border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; background: #24372c; color: var(--text); font-weight: 750; flex: 1; transition: transform .1s, background .15s; }
+    .button:active { transform: scale(.98); }
+    .primary { color: #102419; background: var(--accent); border-color: var(--accent); flex: 2; }
+    .primary:hover { background: #c0ffd0; }
+    .secondary:hover { background: #354d3d; }
+    .backup-actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 17px 17px; }
+    .backup-actions .button { min-width: 130px; }
+    .note { margin: 0 19px 19px; font-size: .78rem; color: var(--muted); }
+    .foot { text-align: center; color: #8da696; font-size: .8rem; margin-top: 24px; }
+    #toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 20px); background: #cfffd8; color: #132e1d; border-radius: 12px; padding: 11px 18px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; font-size: .9rem; font-weight: 750; box-shadow: 0 12px 32px #0008; z-index: 10; }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } .preview-panel { position: static; } }
+    @media (max-width: 490px) {
+      .wrap { padding: 22px 12px 52px; }
+      .top { align-items: flex-start; } .pill { display: none; }
+      .panel { border-radius: 14px; }
+      .panel-header { padding: 18px 15px 15px; }
+      .meta { padding: 0 15px 17px; }
+      .items-header { margin-left: 15px; margin-right: 15px; }
+      .items { padding: 0 7px; }
+      .item-row { grid-template-columns: 13px minmax(0, 1fr) 82px 30px; gap: 4px; }
+      .item-row .field { padding: 9px 7px; font-size: .84rem; }
+      .item-row .amount-wrap .field { padding-right: 20px; }
+      .currency { right: 6px; }
+      .icon-btn { width: 30px; }
+      .add { margin-left: 15px; }
+      .total-wrap { padding: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div>
+        <p class="eyebrow">SHOPPING LIST / বাজারের হিসাব</p>
+        <h1>আমার বাজারের তালিকা</h1>
+        <p class="subtitle">মাস, পণ্যের নাম ও দাম বদলান। হিসাব নিজে থেকেই আপডেট হবে।</p>
+      </div>
+      <span class="pill"><span class="dot"></span> Offline · Auto-save</span>
+    </header>
+
+    <div class="layout">
+      <section class="panel" aria-label="বাজারের তালিকা সম্পাদনা">
+        <div class="panel-header"><h2>তালিকা সম্পাদনা</h2><span class="small">সব ঘর পরিবর্তনযোগ্য</span></div>
+        <div class="meta">
+          <div><label for="owner">নাম</label><input id="owner" class="field" type="text" autocomplete="off" placeholder="আপনার নাম"></div>
+          <div><label for="month">মাস</label><input id="month" class="field" type="text" autocomplete="off" placeholder="যেমন: নভেম্বর"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="items-header"><h3>বাজারের আইটেম</h3><span id="count"></span></div>
+        <div id="items" class="items"></div>
+        <button type="button" class="add" id="add">＋ নতুন আইটেম যোগ করুন</button>
+        <div class="total-wrap"><span class="total-label">সর্বমোট</span><span class="total" id="total">০৳</span></div>
+      </section>
+
+      <section class="panel preview-panel" aria-label="কপি করার লেখা">
+        <div class="panel-header"><h2>কপি প্রিভিউ</h2><span class="small">• বুলেটসহ</span></div>
+        <p class="preview-intro">ঠিক নিচের লেখাটিই কপি হবে।</p>
+        <pre class="preview" id="preview" aria-live="polite"></pre>
+        <div class="actions">
+          <button type="button" class="button primary" id="copy">⧉ সম্পূর্ণ লেখা কপি</button>
+          <button type="button" class="button secondary" id="new-list">নতুন মাস</button>
+        </div>
+        <div class="backup-actions">
+          <button type="button" class="button secondary" id="export-json">↓ JSON এক্সপোর্ট</button>
+          <button type="button" class="button secondary" id="import-json">↑ JSON ইমপোর্ট</button>
+          <input id="import-file" type="file" accept=".json,application/json" hidden aria-label="JSON ফাইল বেছে নিন">
+        </div>
+        <p class="note">তালিকা এই ব্রাউজারে নিজে থেকে সেভ হয়। অন্য ডিভাইসে নিতে JSON এক্সপোর্ট করুন, তারপর ইমপোর্ট করুন। স্বয়ংক্রিয় সিঙ্ক হয় না।</p>
+      </section>
+    </div>
+    <p class="foot">কোনো লগইন লাগে না · প্রত্যেকের হিসাব নিজের ব্রাউজারেই থাকে</p>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+      const STORAGE_KEY = 'bzlistx-list-v1';
+      // Start with a blank list for every new browser. Each person's data is private to that browser.
+      const initial = {
+        owner: '',
+        month: '',
+        items: [{ name: '', price: '' }]
+      };
+      const bengaliDigits = '০১২৩৪৫৬৭৮৯';
+      const englishDigits = '0123456789';
+      const fmt = new Intl.NumberFormat('bn-BD', { maximumFractionDigits: 2 });
+      const els = {
+        owner: document.getElementById('owner'), month: document.getElementById('month'),
+        items: document.getElementById('items'), count: document.getElementById('count'),
+        total: document.getElementById('total'), preview: document.getElementById('preview'),
+        add: document.getElementById('add'), copy: document.getElementById('copy'),
+        newList: document.getElementById('new-list'), toast: document.getElementById('toast'),
+        exportJson: document.getElementById('export-json'), importJson: document.getElementById('import-json'),
+        importFile: document.getElementById('import-file')
+      };
+      let saved;
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (_) {}
+      const isValid = saved && typeof saved === 'object' && typeof saved.owner === 'string' &&
+        typeof saved.month === 'string' && Array.isArray(saved.items) &&
+        saved.items.every(i => i && typeof i.name === 'string' && typeof i.price === 'string');
+      let state = isValid ? saved : structuredCloneFallback(initial);
+      let toastTimer;
+
+      function structuredCloneFallback(value) { return JSON.parse(JSON.stringify(value)); }
+      function toEnglish(value) {
+        return String(value).replace(/[০-৯]/g, ch => englishDigits[bengaliDigits.indexOf(ch)]);
+      }
+      function getPrice(value) {
+        const normalized = toEnglish(value).replace(/[\s,৳]/g, '').trim();
+        if (!normalized || !/^\d+(?:\.\d{1,2})?$/.test(normalized)) return null;
+        const amount = Number(normalized);
+        return Number.isFinite(amount) ? amount : null;
+      }
+      function formattedPrice(number) { return fmt.format(number) + '৳'; }
+      function writeStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
+      function copyText() {
+        if (!state.owner.trim() && !state.month.trim() && !state.items.some(item => item.name.trim())) return '';
+        const person = state.owner.trim() || 'নাম';
+        const month = state.month.trim() || 'মাস';
+        const lines = [`বাজারঃ ${person} (${month})`, ''];
+        state.items.forEach(item => {
+          const name = item.name.trim();
+          if (!name) return;
+          const price = getPrice(item.price);
+          lines.push(`• ${name}${price === null ? '' : ' - ' + formattedPrice(price)}`);
+        });
+        const total = state.items.reduce((sum, item) =>
+          sum + (item.name.trim() ? (getPrice(item.price) ?? 0) : 0), 0);
+        lines.push('', `মোট: ${formattedPrice(total)}`);
+        return lines.join('\n');
+      }
+      function updateSummary() {
+        const visibleCount = state.items.filter(item => item.name.trim()).length;
+        const total = state.items.reduce((sum, item) =>
+          sum + (item.name.trim() ? (getPrice(item.price) ?? 0) : 0), 0);
+        els.count.textContent = `${fmt.format(visibleCount)}টি আইটেম`;
+        els.total.textContent = formattedPrice(total);
+        els.preview.textContent = copyText();
+        writeStorage();
+      }
+      function makeInput(value, placeholder, field, index) {
+        const input = document.createElement('input');
+        input.className = 'field';
+        input.type = 'text';
+        input.autocomplete = 'off';
+        input.value = value;
+        input.placeholder = placeholder;
+        input.dataset.index = index;
+        input.dataset.field = field;
+        if (field === 'price') {
+          input.inputMode = 'decimal';
+          input.setAttribute('aria-label', `আইটেম ${index + 1} এর দাম`);
+        } else input.setAttribute('aria-label', `আইটেম ${index + 1} এর নাম`);
+        return input;
+      }
+      function renderItems(focusIndex = -1) {
+        els.items.replaceChildren();
+        const fragment = document.createDocumentFragment();
+        state.items.forEach((item, index) => {
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          const bullet = document.createElement('span');
+          bullet.className = 'bullet';
+          bullet.textContent = '•';
+          bullet.setAttribute('aria-hidden', 'true');
+          row.append(bullet, makeInput(item.name, 'পণ্যের নাম / পরিমাণ', 'name', index));
+          const amountWrap = document.createElement('div');
+          amountWrap.className = 'amount-wrap';
+          const priceInput = makeInput(item.price, '০', 'price', index);
+          const currency = document.createElement('span');
+          currency.className = 'currency';
+          currency.textContent = '৳';
+          amountWrap.append(priceInput, currency);
+          row.append(amountWrap);
+          const remove = document.createElement('button');
+          remove.className = 'icon-btn';
+          remove.type = 'button';
+          remove.dataset.remove = index;
+          remove.textContent = '×';
+          remove.title = 'আইটেম মুছুন';
+          remove.setAttribute('aria-label', `আইটেম ${index + 1} মুছুন`);
+          row.append(remove);
+          fragment.append(row);
+        });
+        els.items.append(fragment);
+        updateSummary();
+        if (focusIndex >= 0) {
+          const field = els.items.querySelector(`input[data-index="${focusIndex}"][data-field="name"]`);
+          if (field) field.focus();
+        }
+      }
+      function showToast(message) {
+        els.toast.textContent = message;
+        els.toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => els.toast.classList.remove('show'), 2600);
+      }
+      async function copyToClipboard(value) {
+        if (navigator.clipboard && window.isSecureContext) {
+          try { await navigator.clipboard.writeText(value); return true; } catch (_) {}
+        }
+        const area = document.createElement('textarea');
+        area.value = value;
+        area.setAttribute('readonly', '');
+        area.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+        document.body.appendChild(area);
+        area.select();
+        area.setSelectionRange(0, area.value.length);
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (_) {}
+        area.remove();
+        return ok;
+      }
+
+      function exportJSON() {
+        const total = state.items.reduce((sum, item) =>
+          sum + (item.name.trim() ? (getPrice(item.price) ?? 0) : 0), 0);
+        const backup = {
+          schemaVersion: 1,
+          owner: state.owner,
+          month: state.month,
+          items: state.items.map(item => ({ name: item.name, price: item.price })),
+          total,
+          exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2) + '\n'], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = (state.month.trim() || 'month').replace(/[^\p{L}\p{N}_-]/gu, '-').slice(0, 50);
+        a.href = url;
+        a.download = `bazar-${safeName}.json`;
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        showToast('✓ JSON ফাইল এক্সপোর্ট হয়েছে');
+      }
+      async function importJSON(file) {
+        if (!file) return;
+        if (file.size > 1024 * 1024) { showToast('ফাইলটি অনেক বড় (সর্বোচ্চ ১ MB)'); return; }
+        try {
+          const parsed = JSON.parse(await file.text());
+          const valid = parsed && parsed.schemaVersion === 1 &&
+            typeof parsed.owner === 'string' && typeof parsed.month === 'string' &&
+            Array.isArray(parsed.items) && parsed.items.length <= 500 &&
+            parsed.items.every(item => item && typeof item.name === 'string' && typeof item.price === 'string');
+          if (!valid) throw new Error('invalid');
+          if (!window.confirm('ইমপোর্ট করলে বর্তমান তালিকা বদলে যাবে। এগোবেন?')) return;
+          state = {
+            owner: parsed.owner, month: parsed.month,
+            items: parsed.items.map(item => ({ name: item.name, price: item.price }))
+          };
+          els.owner.value = state.owner;
+          els.month.value = state.month;
+          renderItems();
+          showToast('✓ JSON ফাইল থেকে তালিকা লোড হয়েছে');
+        } catch (_) { showToast('JSON ফাইলটি সঠিক ফরম্যাটে নেই'); }
+      }
+
+      els.owner.value = state.owner;
+      els.month.value = state.month;
+      els.owner.addEventListener('input', () => { state.owner = els.owner.value; updateSummary(); });
+      els.month.addEventListener('input', () => { state.month = els.month.value; updateSummary(); });
+      els.items.addEventListener('input', e => {
+        const input = e.target.closest('input[data-field]');
+        if (!input) return;
+        const item = state.items[Number(input.dataset.index)];
+        if (!item) return;
+        item[input.dataset.field] = input.value;
+        updateSummary();
+      });
+      els.items.addEventListener('click', e => {
+        const button = e.target.closest('button[data-remove]');
+        if (!button) return;
+        state.items.splice(Number(button.dataset.remove), 1);
+        renderItems();
+      });
+      els.add.addEventListener('click', () => {
+        state.items.push({ name: '', price: '' });
+        renderItems(state.items.length - 1);
+      });
+      els.copy.addEventListener('click', async () => {
+        if (!copyText()) { showToast('প্রথমে বাজারের তথ্য লিখুন'); return; }
+        const success = await copyToClipboard(copyText());
+        showToast(success ? '✓ বুলেটসহ সম্পূর্ণ লেখা কপি হয়েছে!' : 'কপি করা যায়নি। প্রিভিউ থেকে লেখা নির্বাচন করে কপি করুন।');
+      });
+      els.exportJson.addEventListener('click', exportJSON);
+      els.importJson.addEventListener('click', () => els.importFile.click());
+      els.importFile.addEventListener('change', async () => {
+        const file = els.importFile.files && els.importFile.files[0];
+        await importJSON(file);
+        els.importFile.value = '';
+      });
+      els.newList.addEventListener('click', () => {
+        if (!window.confirm('নতুন মাসের জন্য বর্তমান আইটেমগুলো মুছে যাবে। আগে কপি করে রাখুন। এগোবেন?')) return;
+        state.month = '';
+        state.items = [{ name: '', price: '' }];
+        els.month.value = '';
+        renderItems();
+        els.month.focus();
+        showToast('নতুন মাসের খালি তালিকা তৈরি হয়েছে');
+      });
+      renderItems();
+    })();
+  </script>
+</body>
+</html>
