@@ -2,8 +2,16 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#180e14">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BZListX">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="manifest" href="./manifest.webmanifest">
   <title>বাজারের হিসাব | Shopping List</title>
   <meta name="description" content="বাজারের হিসাব রাখুন, মোট হিসাব দেখুন এবং • চিহ্নসহ তালিকা কপি করুন। JSON ব্যাকআপ ও ইমপোর্ট।">
   <meta property="og:type" content="website">
@@ -105,6 +113,44 @@
       .add { margin-left: 15px; }
       .total-wrap { padding: 16px; }
     }
+    /* Mobile browser polish */
+    html { max-width: 100%; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+    body { width: 100%; overflow-x: hidden; }
+    button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .wrap, .layout, .panel, .top, .meta, .item-row { min-width: 0; }
+    .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .field { font-size: 1rem; min-height: 46px; }
+    .button { min-height: 48px; }
+    .icon-btn { min-width: 44px; min-height: 44px; }
+    .amount-wrap { min-width: 0; }
+    #toast { width: max-content; max-width: calc(100vw - 24px); text-align: center; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+    .mobile-copy { display: none; }
+    @media (max-width: 490px) {
+      .wrap { width: 100%; padding: 20px 12px calc(104px + env(safe-area-inset-bottom, 0px)); }
+      .top { margin-bottom: 18px; }
+      .meta { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .item-row { grid-template-columns: 12px minmax(0, 1fr) 89px 44px; gap: 4px; }
+      .item-row .field { font-size: 16px; min-height: 46px; padding: 9px 8px; }
+      .item-row .amount-wrap .field { padding-right: 20px; }
+      .icon-btn { width: 44px; height: 46px; }
+      .add { min-height: 46px; }
+      .preview { min-height: 140px; }
+      .total-wrap { flex-wrap: wrap; }
+      .mobile-copy {
+        display: flex; align-items: center; justify-content: center;
+        position: fixed; z-index: 9; left: 12px; right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        min-height: 52px; border: 1px solid #ff8da1;
+        border-radius: 14px; background: #ff647c;
+        color: #2b0e18; font-weight: 800;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, .42);
+      }
+      #toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+    }
+    @media (max-width: 340px) {
+      .item-row { grid-template-columns: 10px minmax(0, 1fr) 79px 44px; }
+      .panel-header { align-items: flex-start; flex-wrap: wrap; }
+    }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
   </style>
 </head>
@@ -151,6 +197,7 @@
     </div>
     <p class="foot">কোনো লগইন লাগে না · প্রত্যেকের হিসাব নিজের ব্রাউজারেই থাকে</p>
   </main>
+  <button class="mobile-copy" type="button" id="quick-copy" aria-label="সম্পূর্ণ বাজারের লেখা কপি করুন">⧉ সম্পূর্ণ লেখা কপি</button>
   <div id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -170,7 +217,7 @@
         owner: document.getElementById('owner'), month: document.getElementById('month'),
         items: document.getElementById('items'), count: document.getElementById('count'),
         total: document.getElementById('total'), preview: document.getElementById('preview'),
-        add: document.getElementById('add'), copy: document.getElementById('copy'),
+        add: document.getElementById('add'), copy: document.getElementById('copy'), quickCopy: document.getElementById('quick-copy'),
         newList: document.getElementById('new-list'), toast: document.getElementById('toast'),
         exportJson: document.getElementById('export-json'), importJson: document.getElementById('import-json'),
         importFile: document.getElementById('import-file')
@@ -225,6 +272,7 @@
         input.className = 'field';
         input.type = 'text';
         input.autocomplete = 'off';
+        input.enterKeyHint = field === 'price' ? 'done' : 'next';
         input.value = value;
         input.placeholder = placeholder;
         input.dataset.index = index;
@@ -361,11 +409,14 @@
         state.items.push({ name: '', price: '' });
         renderItems(state.items.length - 1);
       });
-      els.copy.addEventListener('click', async () => {
-        if (!copyText()) { showToast('প্রথমে বাজারের তথ্য লিখুন'); return; }
-        const success = await copyToClipboard(copyText());
+      async function handleCopy() {
+        const text = copyText();
+        if (!text) { showToast('প্রথমে বাজারের তথ্য লিখুন'); return; }
+        const success = await copyToClipboard(text);
         showToast(success ? '✓ বুলেটসহ সম্পূর্ণ লেখা কপি হয়েছে!' : 'কপি করা যায়নি। প্রিভিউ থেকে লেখা নির্বাচন করে কপি করুন।');
-      });
+      }
+      els.copy.addEventListener('click', handleCopy);
+      els.quickCopy.addEventListener('click', handleCopy);
       els.exportJson.addEventListener('click', exportJSON);
       els.importJson.addEventListener('click', () => els.importFile.click());
       els.importFile.addEventListener('change', async () => {
@@ -383,6 +434,12 @@
         showToast('নতুন মাসের খালি তালিকা তৈরি হয়েছে');
       });
       renderItems();
+      // The service worker is scoped to this app folder; user data stays in localStorage.
+      if ('serviceWorker' in navigator && window.isSecureContext) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+      }
     })();
   </script>
 </body>
