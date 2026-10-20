@@ -66,6 +66,7 @@
     .items-header { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 19px 22px 9px; }
     .items-header h3 { font-size: .91rem; margin: 0; }
     #count { color: var(--muted); font-size: .8rem; }
+    .keyboard-hint { margin: -1px 22px 11px; color: var(--muted); font-size: .75rem; }
     .items { padding: 0 14px 0; }
     .item-row { display: grid; grid-template-columns: 21px minmax(0, 1fr) 104px 35px; gap: 8px; align-items: center; padding: 7px 5px; }
     .bullet { color: var(--accent); text-align: center; font-size: 1.25rem; user-select: none; }
@@ -104,6 +105,7 @@
       .panel-header { padding: 18px 15px 15px; }
       .meta { padding: 0 15px 17px; }
       .items-header { margin-left: 15px; margin-right: 15px; }
+      .keyboard-hint { margin-left: 15px; margin-right: 15px; }
       .items { padding: 0 7px; }
       .item-row { grid-template-columns: 13px minmax(0, 1fr) 82px 30px; gap: 4px; }
       .item-row .field { padding: 9px 7px; font-size: .84rem; }
@@ -174,6 +176,7 @@
         </div>
         <div class="divider"></div>
         <div class="items-header"><h3>বাজারের আইটেম</h3><span id="count"></span></div>
+        <p class="keyboard-hint">⌨ Enter চাপুন: পণ্যের নাম → দাম → পরের আইটেম</p>
         <div id="items" class="items"></div>
         <button type="button" class="add" id="add">＋ নতুন আইটেম যোগ করুন</button>
         <div class="total-wrap"><span class="total-label">সর্বমোট</span><span class="total" id="total">০৳</span></div>
@@ -272,7 +275,7 @@
         input.className = 'field';
         input.type = 'text';
         input.autocomplete = 'off';
-        input.enterKeyHint = field === 'price' ? 'done' : 'next';
+        input.enterKeyHint = 'next';
         input.value = value;
         input.placeholder = placeholder;
         input.dataset.index = index;
@@ -398,6 +401,34 @@
         if (!item) return;
         item[input.dataset.field] = input.value;
         updateSummary();
+      });
+      // Keyboard-only entry: item name → price → next item's name.
+      // Keep focus in existing rows when editing older entries, and avoid extra blank rows.
+      els.items.addEventListener('keydown', e => {
+        if (e.key !== 'Enter' || e.isComposing || e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+        const input = e.target.closest('input[data-field]');
+        if (!input || !els.items.contains(input)) return;
+        const index = Number(input.dataset.index);
+        const item = state.items[index];
+        if (!item) return;
+        e.preventDefault(); // Don't submit a form or dismiss the keyboard.
+        if (input.dataset.field === 'name') {
+          const price = els.items.querySelector(`input[data-index="${index}"][data-field="price"]`);
+          price?.focus();
+          return;
+        }
+        if (!item.name.trim() && !item.price.trim()) {
+          const name = els.items.querySelector(`input[data-index="${index}"][data-field="name"]`);
+          name?.focus();
+          return;
+        }
+        if (index + 1 < state.items.length) {
+          const next = els.items.querySelector(`input[data-index="${index + 1}"][data-field="name"]`);
+          next?.focus();
+          return;
+        }
+        state.items.push({ name: '', price: '' });
+        renderItems(state.items.length - 1);
       });
       els.items.addEventListener('click', e => {
         const button = e.target.closest('button[data-remove]');
