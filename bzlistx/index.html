@@ -62,6 +62,25 @@
     label { display: block; color: #d3b4be; font-weight: 650; font-size: .8rem; margin-bottom: 7px; }
     .field { width: 100%; min-width: 0; background: #170e16; border: 1px solid #66404e; border-radius: 11px; padding: 12px 13px; color: var(--text); }
     .field::placeholder { color: #9d7988; }
+    /* Native month picker overlays just the arrow; the adjacent input stays fully editable. */
+    .month-picker { position: relative; min-width: 0; }
+    .month-picker .field { padding-right: 58px; }
+    .month-arrow {
+      position: absolute; right: 0; top: 0; bottom: 0;
+      display: flex; align-items: center; justify-content: center;
+      width: 48px; border-left: 1px solid #66404e;
+      color: #ff9caf; font-size: 1.75rem;
+      border-radius: 0 11px 11px 0; pointer-events: none;
+      background: #301826;
+    }
+    .month-picker:focus-within .month-arrow { border-color: var(--accent); }
+    .month-select {
+      position: absolute; inset: 0 0 0 auto; width: 48px; height: 100%;
+      opacity: 0; cursor: pointer; font-size: 16px;
+      -webkit-appearance: menulist; appearance: menulist;
+    }
+    .month-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; opacity: .05; }
+
     .presets-box { margin: 0 22px 20px; padding: 0; border: 1px solid #623646; background: #2a1723; border-radius: 14px; overflow: hidden; }
     .presets-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px 14px; padding: 15px 16px; cursor: pointer; list-style: none; user-select: none; min-height: 54px; }
     .presets-heading::-webkit-details-marker { display: none; }
@@ -318,7 +337,28 @@
         <div class="panel-header"><h2>তালিকা সম্পাদনা</h2><span class="small">সব ঘর পরিবর্তনযোগ্য</span></div>
         <div class="meta">
           <div><label for="owner">নাম</label><input id="owner" class="field" type="text" autocomplete="off" placeholder="আপনার নাম"></div>
-          <div><label for="month">মাস</label><input id="month" class="field" type="text" autocomplete="off" placeholder="যেমন: নভেম্বর"></div>
+          <div>
+            <label for="month">মাস</label>
+            <div class="month-picker">
+              <input id="month" class="field" type="text" autocomplete="off" placeholder="মাস লিখুন বা বেছে নিন">
+              <span class="month-arrow" aria-hidden="true">⌄</span>
+              <select id="month-preset" class="month-select" aria-label="১২ মাস থেকে একটি বেছে নিন" title="বাংলায় মাস বেছে নিন">
+                <option value="">মাস নির্বাচন</option>
+                <option value="জানুয়ারি">জানুয়ারি</option>
+                <option value="ফেব্রুয়ারি">ফেব্রুয়ারি</option>
+                <option value="মার্চ">মার্চ</option>
+                <option value="এপ্রিল">এপ্রিল</option>
+                <option value="মে">মে</option>
+                <option value="জুন">জুন</option>
+                <option value="জুলাই">জুলাই</option>
+                <option value="আগস্ট">আগস্ট</option>
+                <option value="সেপ্টেম্বর">সেপ্টেম্বর</option>
+                <option value="অক্টোবর">অক্টোবর</option>
+                <option value="নভেম্বর">নভেম্বর</option>
+                <option value="ডিসেম্বর">ডিসেম্বর</option>
+              </select>
+            </div>
+          </div>
         </div>
         <details class="presets-box" id="presets-accordion" aria-label="দ্রুত বাজারের পণ্য যোগ করুন" open>
           <summary class="presets-heading">
@@ -397,7 +437,7 @@
       const englishDigits = '0123456789';
       const fmt = new Intl.NumberFormat('bn-BD', { maximumFractionDigits: 2 });
       const els = {
-        owner: document.getElementById('owner'), month: document.getElementById('month'),
+        owner: document.getElementById('owner'), month: document.getElementById('month'), monthPreset: document.getElementById('month-preset'),
         items: document.getElementById('items'), count: document.getElementById('count'),
         total: document.getElementById('total'), preview: document.getElementById('preview'),
         add: document.getElementById('add'), copy: document.getElementById('copy'), quickCopy: document.getElementById('quick-copy'),
@@ -557,7 +597,7 @@
         input.dataset.index = index; input.dataset.field = field;
         if (field === 'quantity') input.inputMode = 'decimal';
         if (field === 'price') {
-          input.inputMode = 'text'; // Allows * / + - on Android virtual keyboards.
+          input.inputMode = 'decimal'; // Use native Android numeric keyboard (as for quantity).
           input.spellcheck = false;
           input.autocapitalize = 'off';
           input.title = 'দাম বা হিসাব: 56-20, 88*2, (50+20)*3';
@@ -686,6 +726,15 @@
       els.month.value = state.month;
       els.owner.addEventListener('input', () => { state.owner = els.owner.value; updateSummary(); });
       els.month.addEventListener('input', () => { state.month = els.month.value; updateSummary(); });
+      els.monthPreset.addEventListener('change', () => {
+        const selected = els.monthPreset.value;
+        if (!selected) return;
+        els.month.value = selected;
+        state.month = selected;
+        updateSummary();
+        // Reset the select so the same month can be chosen again after custom edits.
+        els.monthPreset.value = '';
+      });
       els.items.addEventListener('input', e => {
         const input = e.target.closest('input[data-field]');
         if (!input) return;
