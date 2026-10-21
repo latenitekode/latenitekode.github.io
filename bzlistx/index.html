@@ -62,9 +62,15 @@
     label { display: block; color: #d3b4be; font-weight: 650; font-size: .8rem; margin-bottom: 7px; }
     .field { width: 100%; min-width: 0; background: #170e16; border: 1px solid #66404e; border-radius: 11px; padding: 12px 13px; color: var(--text); }
     .field::placeholder { color: #9d7988; }
-    .presets-box { margin: 0 22px 20px; padding: 16px; border: 1px solid #623646; background: #2a1723; border-radius: 14px; }
-    .presets-heading { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; }
+    .presets-box { margin: 0 22px 20px; padding: 0; border: 1px solid #623646; background: #2a1723; border-radius: 14px; overflow: hidden; }
+    .presets-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px 14px; padding: 15px 16px; cursor: pointer; list-style: none; user-select: none; min-height: 54px; }
+    .presets-heading::-webkit-details-marker { display: none; }
+    .presets-heading:hover { background: #3b1d2c; }
+    .presets-heading:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
     .presets-heading h3 { font-size: 1rem; margin: 0; }
+    .presets-body { padding: 0 16px 16px; }
+    .preset-chevron { display: block; width: 10px; height: 10px; flex: 0 0 10px; margin-left: auto; border-right: 2px solid #ff94a8; border-bottom: 2px solid #ff94a8; transform: rotate(45deg); transition: transform .15s; }
+    .presets-box[open] .preset-chevron { transform: rotate(225deg); }
     .presets-helper, .preset-footnote { color: var(--muted); font-size: .76rem; }
     .preset-group { margin-top: 12px; }
     .preset-category { margin: 0 0 8px; color: #e5b1c1; font-size: .79rem; font-weight: 650; }
@@ -76,7 +82,9 @@
     .preset-unit { color: #ff9caf; font-size: .74rem; font-weight: 550; }
     .preset-footnote { margin: 11px 0 0; }
     @media (max-width: 490px) {
-      .presets-box { margin: 0 15px 17px; padding: 12px; }
+      .presets-box { margin: 0 15px 17px; padding: 0; }
+      .presets-heading { padding: 12px; }
+      .presets-body { padding: 0 12px 12px; }
       .preset-chips { gap: 7px; }
       .preset-chip { padding: 9px 10px; min-height: 44px; font-size: .82rem; }
       .presets-heading { align-items: start; }
@@ -213,6 +221,18 @@
       .quantity-box { width:min(100%,300px); }
       .qty-unit { width:83px; flex-basis:83px; font-size:13px; }
     }
+
+    .amount-wrap .calc-result {
+      display: block; min-height: 15px; margin-top: 2px;
+      font-size: .72rem; line-height: 1.2;
+      color: #ff9faf; white-space: nowrap;
+    }
+    .amount-wrap .calc-result.invalid { color: #ffb2a7; }
+    .amount-wrap .field[aria-invalid="true"] { border-color: #dd7489; }
+    .item-row:focus-within .amount-wrap { min-width: 0; }
+    .amount-wrap input[data-field="price"]:focus {
+      box-shadow: 0 0 0 2px rgba(255,100,124,.16);
+    }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
   </style>
 </head>
@@ -234,11 +254,13 @@
           <div><label for="owner">নাম</label><input id="owner" class="field" type="text" autocomplete="off" placeholder="আপনার নাম"></div>
           <div><label for="month">মাস</label><input id="month" class="field" type="text" autocomplete="off" placeholder="যেমন: নভেম্বর"></div>
         </div>
-        <section class="presets-box" aria-label="দ্রুত বাজারের পণ্য যোগ করুন">
-          <div class="presets-heading">
+        <details class="presets-box" id="presets-accordion" aria-label="দ্রুত বাজারের পণ্য যোগ করুন" open>
+          <summary class="presets-heading">
             <h3>দ্রুত যোগ করুন</h3>
-            <span class="presets-helper">পণ্য চাপলেই তালিকায় যোগ হবে</span>
-          </div>
+            <span class="presets-helper">প্রয়োজনে খুলুন বা লুকান</span>
+            <span class="preset-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="presets-body">
           <div class="preset-group">
             <p class="preset-category">নিত্যপ্রয়োজনীয়</p>
             <div class="preset-chips">
@@ -263,11 +285,12 @@
               <button type="button" class="preset-chip" data-preset="জিরা গুঁড়া ১০০গ্রাম" aria-label="জিরা গুঁড়া ১০০গ্রাম যোগ করুন"><span>জিরা গুঁড়া</span><span class="preset-unit">১০০গ্রাম</span></button>
             </div>
           </div>
-          <p class="preset-footnote">পরিমাণ বদলাতে পারবেন। দাম নিজে লিখুন।</p>
-        </section>
+            <p class="preset-footnote">পরিমাণ বদলাতে পারবেন। দাম নিজে লিখুন।</p>
+          </div>
+        </details>
         <div class="divider"></div>
         <div class="items-header"><h3>বাজারের আইটেম</h3><span id="count"></span></div>
-        <p class="keyboard-hint">⌨ Enter: পণ্যের নাম → পরিমাণ → দাম → পরের আইটেম</p>
+        <p class="keyboard-hint">⌨ Enter: পণ্যের নাম → পরিমাণ → দাম → পরের আইটেম। দামে + − × ÷ ব্যবহার করুন (যেমন ৫৬-২০)।</p>
         <div id="items" class="items"></div>
         <button type="button" class="add" id="add">＋ নতুন আইটেম যোগ করুন</button>
         <div class="total-wrap"><span class="total-label">সর্বমোট</span><span class="total" id="total">০৳</span></div>
@@ -341,11 +364,83 @@
       function toEnglish(value) {
         return String(value).replace(/[০-৯]/g, ch => englishDigits[bengaliDigits.indexOf(ch)]);
       }
+      // Restricted arithmetic parser, not eval: only prices, operators, and parentheses.
+      // Intermediate results retain precision; the final amount rounds to 2 decimal places.
       function getPrice(value) {
-        const normalized = toEnglish(value).replace(/[\s,৳]/g, '').trim();
-        if (!normalized || !/^\d+(?:\.\d{1,2})?$/.test(normalized)) return null;
-        const amount = Number(normalized);
-        return Number.isFinite(amount) ? amount : null;
+        const expression = toEnglish(value).replace(/[\s,৳,]/g, '')
+          .replace(/[×xX]/g, '*').replace(/÷/g, '/').replace(/[−–]/g, '-');
+        if (!expression || expression.length > 120 || /[^0-9.+*/()\-]/.test(expression)) return null;
+        let index = 0, depth = 0;
+        function factor() {
+          if (expression[index] === '+' || expression[index] === '-') {
+            const sign = expression[index++] === '-' ? -1 : 1;
+            return sign * factor();
+          }
+          if (expression[index] === '(') {
+            if (++depth > 12) throw Error('too deep');
+            index++;
+            const value = sum();
+            if (expression[index++] !== ')') throw Error('missing bracket');
+            depth--;
+            return value;
+          }
+          const match = /^(?:\d+(?:\.\d*)?|\.\d+)/.exec(expression.slice(index));
+          if (!match) throw Error('invalid number');
+          index += match[0].length;
+          return Number(match[0]);
+        }
+        function product() {
+          let value = factor();
+          while (expression[index] === '*' || expression[index] === '/') {
+            const op = expression[index++];
+            const right = factor();
+            if (op === '/' && right === 0) throw Error('division by zero');
+            value = op === '*' ? value * right : value / right;
+          }
+          return value;
+        }
+        function sum() {
+          let value = product();
+          while (expression[index] === '+' || expression[index] === '-') {
+            const op = expression[index++];
+            const right = product();
+            value = op === '+' ? value + right : value - right;
+          }
+          return value;
+        }
+        try {
+          const value = sum();
+          if (index !== expression.length || !Number.isFinite(value) || value < 0 || value > 1e12) return null;
+          return Math.round((value + Number.EPSILON) * 100) / 100;
+        } catch (_) { return null; }
+      }
+      function isPriceExpression(value) {
+        return /[+*/()×÷xX−–-]/.test(String(value));
+      }
+      function refreshPriceHint(input) {
+        if (!input || input.dataset.field !== 'price') return;
+        const hint = input.parentElement.querySelector('.calc-result');
+        if (!hint) return;
+        const raw = input.value;
+        const show = isPriceExpression(raw);
+        const result = getPrice(raw);
+        hint.textContent = show ? (result === null ? 'হিসাব মিলছে না' : '= ' + formattedPrice(result)) : '';
+        hint.classList.toggle('invalid', show && result === null);
+        input.setAttribute('aria-invalid', String(show && result === null));
+      }
+      function finalizePrice(input) {
+        if (!input || input.dataset.field !== 'price') return;
+        const index = Number(input.dataset.index);
+        const item = state.items[index];
+        if (!item) return;
+        const result = getPrice(input.value);
+        if (result !== null && isPriceExpression(input.value)) {
+          const resolved = fmt.format(result);
+          input.value = resolved;
+          item.price = resolved;
+        }
+        refreshPriceHint(input);
+        updateSummary();
       }
       function formattedPrice(number) { return fmt.format(number) + '৳'; }
       function getQuantity(value) {
@@ -394,7 +489,13 @@
         input.type = 'text'; input.autocomplete = 'off'; input.enterKeyHint = 'next';
         input.value = value; input.placeholder = placeholder;
         input.dataset.index = index; input.dataset.field = field;
-        if (field !== 'name') input.inputMode = 'decimal';
+        if (field === 'quantity') input.inputMode = 'decimal';
+        if (field === 'price') {
+          input.inputMode = 'text'; // Allows * / + - on Android virtual keyboards.
+          input.spellcheck = false;
+          input.autocapitalize = 'off';
+          input.title = 'দাম বা হিসাব: 56-20, 88*2, (50+20)*3';
+        }
         input.setAttribute('aria-label', `আইটেম ${index + 1} এর ${field === 'name' ? 'নাম' : field === 'price' ? 'দাম' : 'পরিমাণ'}`);
         return input;
       }
@@ -430,7 +531,11 @@
           const amount = document.createElement('div'); amount.className = 'amount-wrap';
           const price = makeInput(item.price, '০', 'price', index);
           const currency = document.createElement('span'); currency.className = 'currency'; currency.textContent = '৳';
-          amount.append(price, currency); row.append(amount);
+          const calcResult = document.createElement('span');
+          calcResult.className = 'calc-result';
+          calcResult.setAttribute('aria-live', 'polite');
+          amount.append(price, currency, calcResult);
+          row.append(amount);
           const remove = document.createElement('button'); remove.type = 'button';
           remove.className = 'icon-btn remove-btn'; remove.dataset.remove = index;
           remove.textContent = '×'; remove.title = 'আইটেম মুছুন';
@@ -438,6 +543,7 @@
           row.append(remove); frag.append(row);
         });
         els.items.append(frag); updateSummary();
+        els.items.querySelectorAll('input[data-field="price"]').forEach(refreshPriceHint);
         if (focusIndex >= 0)
           els.items.querySelector(`input[data-index="${focusIndex}"][data-field="name"]`)?.focus();
       }
@@ -521,6 +627,7 @@
         if (!item) return;
         item[input.dataset.field] = input.value;
         updateSummary();
+        if (input.dataset.field === 'price') refreshPriceHint(input);
       });
       // Press Enter: name -> quantity -> price -> next item name.
       els.items.addEventListener('keydown', e => {
@@ -534,11 +641,16 @@
           els.items.querySelector(`input[data-index="${at}"][data-field="${field}"]`)?.focus();
         if (input.dataset.field === 'name') { focus(index, 'quantity'); return; }
         if (input.dataset.field === 'quantity') { focus(index, 'price'); return; }
+        if (input.dataset.field === 'price') finalizePrice(input);
         if (!item.name.trim() && !item.quantity.trim() && !item.price.trim()) {
           focus(index, 'name'); return;
         }
         if (index + 1 < state.items.length) { focus(index + 1, 'name'); return; }
         state.items.push(blankItem()); renderItems(state.items.length - 1);
+      });
+      els.items.addEventListener('focusout', e => {
+        const input = e.target.closest('input[data-field="price"]');
+        if (input && els.items.contains(input)) finalizePrice(input);
       });
       els.items.addEventListener('change', e => {
         const select = e.target.closest('select[data-field="unit"]');
@@ -565,7 +677,15 @@
         if (!state.items.length) state.items.push(blankItem());
         renderItems();
       });
-      const presetBox = document.querySelector('.presets-box');
+      const presetBox = document.getElementById('presets-accordion');
+      const PRESET_VISIBILITY_KEY = 'bzlistx-quick-add-open-v1';
+      try {
+        const savedVisibility = localStorage.getItem(PRESET_VISIBILITY_KEY);
+        if (savedVisibility !== null) presetBox.open = savedVisibility === 'true';
+      } catch (_) {}
+      presetBox.addEventListener('toggle', () => {
+        try { localStorage.setItem(PRESET_VISIBILITY_KEY, String(presetBox.open)); } catch (_) {}
+      });
       presetBox.addEventListener('click', e => {
         const button = e.target.closest('button[data-preset]');
         if (!button || !presetBox.contains(button)) return;
