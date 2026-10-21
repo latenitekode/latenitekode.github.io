@@ -233,6 +233,72 @@
     .amount-wrap input[data-field="price"]:focus {
       box-shadow: 0 0 0 2px rgba(255,100,124,.16);
     }
+
+    /* Compact mobile editor: full-width name, quantity stepper next to price. */
+    .hint-mobile { display: none; }
+    .amount-wrap .calc-result:empty { display: none; }
+    .amount-wrap .calc-result { min-height: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .amount-wrap .currency { top: 23px; }
+    @media (max-width: 600px) {
+      .items-header { margin: 14px 14px 5px; }
+      .keyboard-hint { margin: 0 14px 7px; font-size: .76rem; line-height: 1.4; }
+      .hint-desktop { display: none; }
+      .hint-mobile { display: inline; }
+      .items { padding: 0 12px; }
+      .item-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 102px;
+        grid-template-areas: "name name" "quantity price";
+        align-items: start;
+        gap: 6px 8px;
+        padding: 8px 0 10px;
+        border-bottom: 1px solid var(--line);
+      }
+      .item-row:last-child { border-bottom: none; }
+      .item-row .bullet { display: none; }
+      .item-row .item-name {
+        grid-area: name;
+        width: calc(100% - 48px);
+        min-width: 0;
+        height: 44px; min-height: 44px;
+        padding: 8px 12px;
+        font-size: 16px;
+      }
+      .item-row .remove-btn {
+        position: absolute; top: 8px; right: 0;
+        width: 42px; min-width: 42px; height: 44px; min-height: 44px;
+        border: 1px solid #59313e;
+        border-radius: 10px;
+        background: #301a25;
+        font-size: 1.3rem;
+        color: #ff8a9d;
+      }
+      .item-row .quantity-box { grid-area: quantity; width: 100%; min-width: 0; height: 44px; }
+      .quantity-box .qty-btn { flex: 0 0 38px; min-width: 0; font-size: 1.2rem; }
+      .quantity-box .qty-input { min-width: 0; width: 0; flex: 1 1 0; font-size: 16px; }
+      .quantity-box .qty-unit { flex: 0 0 63px; width: 63px; padding: 0 0 0 2px; font-size: 12px; }
+      .item-row .amount-wrap { grid-area: price; min-width: 0; }
+      .item-row .amount-wrap .field {
+        width: 100%; height: 44px; min-height: 44px;
+        padding: 8px 20px 8px 6px;
+        text-align: right; font-size: 16px;
+      }
+      .item-row .amount-wrap .currency { top: 22px; right: 6px; }
+      .item-row .amount-wrap .calc-result { font-size: .7rem; margin-top: 2px; }
+      .panel-header { padding: 15px 14px 12px; }
+      .add { margin: 9px 14px 16px; padding: 9px 12px; min-height: 44px; font-size: .9rem; }
+      .total-wrap { padding: 13px 15px; }
+      .mobile-copy { min-height: 48px; left: 16px; right: 16px; font-size: .95rem; }
+    }
+    @media (max-width: 350px) {
+      .items { padding: 0 9px; }
+      .item-row { grid-template-columns: minmax(0,1fr) 94px; gap: 6px; }
+      .quantity-box .qty-btn { flex-basis: 34px; }
+      .quantity-box .qty-unit { flex-basis: 59px; width: 59px; font-size: 11px; }
+      .item-row .item-name { padding-left: 9px; padding-right: 7px; }
+      .item-row .amount-wrap .field { font-size: 15px; }
+    }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
   </style>
 </head>
@@ -290,7 +356,7 @@
         </details>
         <div class="divider"></div>
         <div class="items-header"><h3>বাজারের আইটেম</h3><span id="count"></span></div>
-        <p class="keyboard-hint">⌨ Enter: পণ্যের নাম → পরিমাণ → দাম → পরের আইটেম। দামে + − × ÷ ব্যবহার করুন (যেমন ৫৬-২০)।</p>
+        <p class="keyboard-hint"><span class="hint-desktop">⌨ Enter: পণ্যের নাম → পরিমাণ → দাম → পরের আইটেম। দামে + − × ÷ ব্যবহার করুন (যেমন ৫৬-২০)।</span><span class="hint-mobile">দামেই হিসাব করুন: ৫৬-২০ → ৩৬৳</span></p>
         <div id="items" class="items"></div>
         <button type="button" class="add" id="add">＋ নতুন আইটেম যোগ করুন</button>
         <div class="total-wrap"><span class="total-label">সর্বমোট</span><span class="total" id="total">০৳</span></div>
