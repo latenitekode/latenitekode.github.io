@@ -62,6 +62,25 @@
     label { display: block; color: #d3b4be; font-weight: 650; font-size: .8rem; margin-bottom: 7px; }
     .field { width: 100%; min-width: 0; background: #170e16; border: 1px solid #66404e; border-radius: 11px; padding: 12px 13px; color: var(--text); }
     .field::placeholder { color: #9d7988; }
+    .presets-box { margin: 0 22px 20px; padding: 16px; border: 1px solid #623646; background: #2a1723; border-radius: 14px; }
+    .presets-heading { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; }
+    .presets-heading h3 { font-size: 1rem; margin: 0; }
+    .presets-helper, .preset-footnote { color: var(--muted); font-size: .76rem; }
+    .preset-group { margin-top: 12px; }
+    .preset-category { margin: 0 0 8px; color: #e5b1c1; font-size: .79rem; font-weight: 650; }
+    .preset-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .preset-chip { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 12px; min-height: 43px; border: 1px solid #804056; border-radius: 9px; background: #3a1b2a; color: #fff1f3; font-size: .86rem; font-weight: 650; white-space: nowrap; transition: background .15s, border-color .15s, transform .12s; }
+    .preset-chip:hover { background: #56243a; border-color: #f07d96; }
+    .preset-chip:active { transform: scale(.97); background: #6b2945; }
+    .preset-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .preset-unit { color: #ff9caf; font-size: .74rem; font-weight: 550; }
+    .preset-footnote { margin: 11px 0 0; }
+    @media (max-width: 490px) {
+      .presets-box { margin: 0 15px 17px; padding: 12px; }
+      .preset-chips { gap: 7px; }
+      .preset-chip { padding: 9px 10px; min-height: 44px; font-size: .82rem; }
+      .presets-heading { align-items: start; }
+    }
     .divider { height: 1px; background: var(--line); }
     .items-header { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 19px 22px 9px; }
     .items-header h3 { font-size: .91rem; margin: 0; }
@@ -174,6 +193,37 @@
           <div><label for="owner">নাম</label><input id="owner" class="field" type="text" autocomplete="off" placeholder="আপনার নাম"></div>
           <div><label for="month">মাস</label><input id="month" class="field" type="text" autocomplete="off" placeholder="যেমন: নভেম্বর"></div>
         </div>
+        <section class="presets-box" aria-label="দ্রুত বাজারের পণ্য যোগ করুন">
+          <div class="presets-heading">
+            <h3>দ্রুত যোগ করুন</h3>
+            <span class="presets-helper">পণ্য চাপলেই তালিকায় যোগ হবে</span>
+          </div>
+          <div class="preset-group">
+            <p class="preset-category">নিত্যপ্রয়োজনীয়</p>
+            <div class="preset-chips">
+              <button type="button" class="preset-chip" data-preset="চাল ১কেজি" aria-label="চাল ১কেজি যোগ করুন"><span>চাল</span><span class="preset-unit">১কেজি</span></button>
+              <button type="button" class="preset-chip" data-preset="ডাল ১কেজি" aria-label="ডাল ১কেজি যোগ করুন"><span>ডাল</span><span class="preset-unit">১কেজি</span></button>
+              <button type="button" class="preset-chip" data-preset="মুরগি ১কেজি" aria-label="মুরগি ১কেজি যোগ করুন"><span>মুরগি</span><span class="preset-unit">১কেজি</span></button>
+              <button type="button" class="preset-chip" data-preset="ডিম ১পিস" aria-label="ডিম ১পিস যোগ করুন"><span>ডিম</span><span class="preset-unit">১পিস</span></button>
+              <button type="button" class="preset-chip" data-preset="তেল ১লিটার" aria-label="তেল ১লিটার যোগ করুন"><span>তেল</span><span class="preset-unit">১লিটার</span></button>
+              <button type="button" class="preset-chip" data-preset="পেঁয়াজ ১কেজি" aria-label="পেঁয়াজ ১কেজি যোগ করুন"><span>পেঁয়াজ</span><span class="preset-unit">১কেজি</span></button>
+              <button type="button" class="preset-chip" data-preset="কাঁচা মরিচ ২৫০গ্রাম" aria-label="কাঁচা মরিচ ২৫০গ্রাম যোগ করুন"><span>কাঁচা মরিচ</span><span class="preset-unit">২৫০গ্রাম</span></button>
+              <button type="button" class="preset-chip" data-preset="রসুন ২৫০গ্রাম" aria-label="রসুন ২৫০গ্রাম যোগ করুন"><span>রসুন</span><span class="preset-unit">২৫০গ্রাম</span></button>
+              <button type="button" class="preset-chip" data-preset="আদা ২৫০গ্রাম" aria-label="আদা ২৫০গ্রাম যোগ করুন"><span>আদা</span><span class="preset-unit">২৫০গ্রাম</span></button>
+              <button type="button" class="preset-chip" data-preset="থালাবাসন-মাজা ১টি" aria-label="থালাবাসন-মাজা ১টি যোগ করুন"><span>থালাবাসন-মাজা</span><span class="preset-unit">১টি</span></button>
+              <button type="button" class="preset-chip" data-preset="লবণ ১কেজি" aria-label="লবণ ১কেজি যোগ করুন"><span>লবণ</span><span class="preset-unit">১কেজি</span></button>
+            </div>
+          </div>
+          <div class="preset-group">
+            <p class="preset-category">গুঁড়া মসলা</p>
+            <div class="preset-chips">
+              <button type="button" class="preset-chip" data-preset="হলুদ গুঁড়া ১০০গ্রাম" aria-label="হলুদ গুঁড়া ১০০গ্রাম যোগ করুন"><span>হলুদ গুঁড়া</span><span class="preset-unit">১০০গ্রাম</span></button>
+              <button type="button" class="preset-chip" data-preset="মরিচ গুঁড়া ১০০গ্রাম" aria-label="মরিচ গুঁড়া ১০০গ্রাম যোগ করুন"><span>মরিচ গুঁড়া</span><span class="preset-unit">১০০গ্রাম</span></button>
+              <button type="button" class="preset-chip" data-preset="জিরা গুঁড়া ১০০গ্রাম" aria-label="জিরা গুঁড়া ১০০গ্রাম যোগ করুন"><span>জিরা গুঁড়া</span><span class="preset-unit">১০০গ্রাম</span></button>
+            </div>
+          </div>
+          <p class="preset-footnote">পরিমাণ বদলাতে পারবেন। দাম নিজে লিখুন।</p>
+        </section>
         <div class="divider"></div>
         <div class="items-header"><h3>বাজারের আইটেম</h3><span id="count"></span></div>
         <p class="keyboard-hint">⌨ Enter চাপুন: পণ্যের নাম → দাম → পরের আইটেম</p>
@@ -435,6 +485,28 @@
         if (!button) return;
         state.items.splice(Number(button.dataset.remove), 1);
         renderItems();
+      });
+      // Presets only appear as buttons. They never populate a visitor's list until selected.
+      // Reuse an entirely blank row when available; keep all existing entries and prices.
+      const presetBox = document.querySelector('.presets-box');
+      presetBox.addEventListener('click', e => {
+        const button = e.target.closest('button[data-preset]');
+        if (!button || !presetBox.contains(button)) return;
+        const name = button.dataset.preset;
+        if (!name) return;
+        let index = state.items.findIndex(item => !item.name.trim() && !item.price.trim());
+        if (index === -1) {
+          index = state.items.length;
+          state.items.push({ name, price: '' });
+        } else {
+          state.items[index].name = name;
+        }
+        renderItems();
+        // On computers the price is ready to type; on mobile stay near chips for multi-tap.
+        if (!window.matchMedia('(pointer: coarse)').matches) {
+          const priceInput = els.items.querySelector(`input[data-index="${index}"][data-field="price"]`);
+          priceInput?.focus();
+        }
       });
       els.add.addEventListener('click', () => {
         state.items.push({ name: '', price: '' });
