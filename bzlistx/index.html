@@ -81,24 +81,25 @@
     }
     .month-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; opacity: .05; }
 
-    .presets-box { margin: 0 22px 20px; padding: 0; border: 1px solid #623646; background: #2a1723; border-radius: 14px; overflow: hidden; }
+    /* Cool slate-blue accent exclusively for the Quick Add accordion. */
+    .presets-box { margin: 0 22px 20px; padding: 0; border: 1px solid #435b79; background: #1b2432; border-radius: 14px; overflow: hidden; }
     .presets-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px 14px; padding: 15px 16px; cursor: pointer; list-style: none; user-select: none; min-height: 54px; }
     .presets-heading::-webkit-details-marker { display: none; }
-    .presets-heading:hover { background: #3b1d2c; }
-    .presets-heading:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
-    .presets-heading h3 { font-size: 1rem; margin: 0; }
+    .presets-heading:hover { background: #25334a; }
+    .presets-heading:focus-visible { outline: 2px solid #93bbef; outline-offset: -3px; }
+    .presets-heading h3 { font-size: 1rem; margin: 0; color: #d9eaff; }
     .presets-body { padding: 0 16px 16px; }
-    .preset-chevron { display: block; width: 10px; height: 10px; flex: 0 0 10px; margin-left: auto; border-right: 2px solid #ff94a8; border-bottom: 2px solid #ff94a8; transform: rotate(45deg); transition: transform .15s; }
+    .preset-chevron { display: block; width: 10px; height: 10px; flex: 0 0 10px; margin-left: auto; border-right: 2px solid #91bdf2; border-bottom: 2px solid #91bdf2; transform: rotate(45deg); transition: transform .15s; }
     .presets-box[open] .preset-chevron { transform: rotate(225deg); }
-    .presets-helper, .preset-footnote { color: var(--muted); font-size: .76rem; }
+    .presets-helper, .preset-footnote { color: #b5c5dc; font-size: .76rem; }
     .preset-group { margin-top: 12px; }
-    .preset-category { margin: 0 0 8px; color: #e5b1c1; font-size: .79rem; font-weight: 650; }
+    .preset-category { margin: 0 0 8px; color: #c3d9f4; font-size: .79rem; font-weight: 650; }
     .preset-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-    .preset-chip { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 12px; min-height: 43px; border: 1px solid #804056; border-radius: 9px; background: #3a1b2a; color: #fff1f3; font-size: .86rem; font-weight: 650; white-space: nowrap; transition: background .15s, border-color .15s, transform .12s; }
-    .preset-chip:hover { background: #56243a; border-color: #f07d96; }
-    .preset-chip:active { transform: scale(.97); background: #6b2945; }
-    .preset-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .preset-unit { color: #ff9caf; font-size: .74rem; font-weight: 550; }
+    .preset-chip { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 12px; min-height: 43px; border: 1px solid #4d688d; border-radius: 9px; background: #26354b; color: #f1f7ff; font-size: .86rem; font-weight: 650; white-space: nowrap; transition: background .15s, border-color .15s, transform .12s; }
+    .preset-chip:hover { background: #334b6a; border-color: #94c5ff; }
+    .preset-chip:active { transform: scale(.97); background: #3b5678; }
+    .preset-chip:focus-visible { outline: 2px solid #94c5ff; outline-offset: 2px; }
+    .preset-unit { color: #a9d0ff; font-size: .74rem; font-weight: 550; }
     .preset-footnote { margin: 11px 0 0; }
     @media (max-width: 490px) {
       .presets-box { margin: 0 15px 17px; padding: 0; }
