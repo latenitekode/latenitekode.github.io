@@ -172,6 +172,47 @@
       .item-row { grid-template-columns: 10px minmax(0, 1fr) 79px 44px; }
       .panel-header { align-items: flex-start; flex-wrap: wrap; }
     }
+
+    /* Boxed minus/quantity/plus/unit controls, independent of the item name and price */
+    .item-row { display:grid; grid-template-columns: 16px minmax(0,1fr) minmax(205px,225px) 96px 44px;
+      grid-template-areas:"bullet name quantity price delete"; gap:8px; align-items:center; padding:10px 5px; }
+    .item-row .bullet { grid-area:bullet; }
+    .item-row .item-name { grid-area:name; min-width:0; }
+    .item-row .quantity-box { grid-area:quantity; }
+    .item-row .amount-wrap { grid-area:price; }
+    .item-row .remove-btn { grid-area:delete; width:44px; height:44px; }
+    .quantity-box { display:flex; align-items:stretch; min-width:0; height:46px; overflow:hidden;
+      border:1px solid #754357; border-radius:11px; background:#170e16; }
+    .qty-btn { flex:0 0 36px; padding:0; border:0; border-right:1px solid #754357;
+      background:#3d1d2d; color:#ff93a6; font-size:1.35rem; font-weight:750; touch-action:manipulation; }
+    .qty-btn:hover { background:#59283d; color:#fff; }
+    .qty-btn:active { background:#722e49; }
+    .qty-input { min-width:0; width:45px; flex:1 1 45px; padding:0 3px;
+      border:0; border-right:1px solid #754357; background:transparent; color:var(--text);
+      font:inherit; font-size:16px; text-align:center; font-variant-numeric:tabular-nums; }
+    .qty-input::placeholder { color:#9d7988; }
+    .qty-unit { flex:0 0 72px; width:72px; min-width:0; padding:0 1px; border:0;
+      border-left:1px solid #754357; background:#2c1823; color:var(--text);
+      font:inherit; font-size:12px; cursor:pointer; }
+    .qty-input:focus-visible, .qty-unit:focus-visible, .qty-btn:focus-visible {
+      outline:2px solid var(--accent); outline-offset:-2px; position:relative; z-index:1; }
+    .quantity-box .qty-btn:nth-of-type(2) { border-right:0; }
+    @media (max-width:1100px) {
+      .item-row { grid-template-columns:16px minmax(0,1fr) 106px 44px;
+        grid-template-areas:"bullet name price delete" ". quantity quantity quantity";
+        row-gap:6px; border-bottom:1px solid var(--line); padding:10px 5px; }
+      .quantity-box { width:min(100%,290px); }
+    }
+    @media (max-width:490px) {
+      .item-row { grid-template-columns:12px minmax(0,1fr) 88px 44px;
+        grid-template-areas:"bullet name price delete" ". quantity quantity quantity";
+        gap:6px 4px; padding:10px 4px; }
+      .item-row .item-name, .item-row .amount-wrap .field { min-height:46px; font-size:16px; }
+      .item-row .remove-btn { width:44px; height:46px; }
+      .qty-btn { flex-basis:44px; }
+      .quantity-box { width:min(100%,300px); }
+      .qty-unit { width:83px; flex-basis:83px; font-size:13px; }
+    }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
   </style>
 </head>
@@ -226,7 +267,7 @@
         </section>
         <div class="divider"></div>
         <div class="items-header"><h3>বাজারের আইটেম</h3><span id="count"></span></div>
-        <p class="keyboard-hint">⌨ Enter চাপুন: পণ্যের নাম → দাম → পরের আইটেম</p>
+        <p class="keyboard-hint">⌨ Enter: পণ্যের নাম → পরিমাণ → দাম → পরের আইটেম</p>
         <div id="items" class="items"></div>
         <button type="button" class="add" id="add">＋ নতুন আইটেম যোগ করুন</button>
         <div class="total-wrap"><span class="total-label">সর্বমোট</span><span class="total" id="total">০৳</span></div>
@@ -261,7 +302,7 @@
       const initial = {
         owner: '',
         month: '',
-        items: [{ name: '', price: '' }]
+        items: [{ name: '', quantity: '', unit: '', price: '' }]
       };
       const bengaliDigits = '০১২৩৪৫৬৭৮৯';
       const englishDigits = '0123456789';
@@ -280,7 +321,20 @@
       const isValid = saved && typeof saved === 'object' && typeof saved.owner === 'string' &&
         typeof saved.month === 'string' && Array.isArray(saved.items) &&
         saved.items.every(i => i && typeof i.name === 'string' && typeof i.price === 'string');
-      let state = isValid ? saved : structuredCloneFallback(initial);
+
+      // Preserve the old storage key and safely migrate 'চাল ২.৫কেজি' labels.
+      function normalizeItem(item) {
+        if (typeof item.quantity === 'string' && typeof item.unit === 'string')
+          return { name: item.name, quantity: item.quantity, unit: item.unit, price: item.price };
+        const match = item.name.trim().match(/^(.*?)\s+([0-9০-৯]+(?:[.,][0-9০-৯]+)?)\s*(মি\.লি\.|কেজি|গ্রাম|লিটার|পিস|টি)$/);
+        return match
+          ? { name: match[1], quantity: match[2], unit: match[3], price: item.price }
+          : { name: item.name, quantity: '', unit: '', price: item.price };
+      }
+      let state = isValid
+        ? {owner: saved.owner, month: saved.month, items: saved.items.map(normalizeItem)}
+        : structuredCloneFallback(initial);
+
       let toastTimer;
 
       function structuredCloneFallback(value) { return JSON.parse(JSON.stringify(value)); }
@@ -294,6 +348,20 @@
         return Number.isFinite(amount) ? amount : null;
       }
       function formattedPrice(number) { return fmt.format(number) + '৳'; }
+      function getQuantity(value) {
+        const clean = toEnglish(value).replace(/[\s,]/g, '').trim();
+        return /^\d+(?:\.\d{1,3})?$/.test(clean) ? Number(clean) : null;
+      }
+      function blankItem() { return {name: '', quantity: '', unit: '', price: ''}; }
+      function quantityStep(unit) {
+        if (unit === 'গ্রাম' || unit === 'মি.লি.') return 50;
+        if (unit === 'কেজি' || unit === 'লিটার') return 0.25;
+        return 1;
+      }
+      function displayItem(item) {
+        const n = getQuantity(item.quantity);
+        return item.name.trim() + (n === null ? '' : ' ' + fmt.format(n) + item.unit);
+      }
       function writeStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
       function copyText() {
         if (!state.owner.trim() && !state.month.trim() && !state.items.some(item => item.name.trim())) return '';
@@ -304,7 +372,7 @@
           const name = item.name.trim();
           if (!name) return;
           const price = getPrice(item.price);
-          lines.push(`• ${name}${price === null ? '' : ' - ' + formattedPrice(price)}`);
+          lines.push(`• ${displayItem(item)}${price === null ? '' : ' - ' + formattedPrice(price)}`);
         });
         const total = state.items.reduce((sum, item) =>
           sum + (item.name.trim() ? (getPrice(item.price) ?? 0) : 0), 0);
@@ -322,55 +390,56 @@
       }
       function makeInput(value, placeholder, field, index) {
         const input = document.createElement('input');
-        input.className = 'field';
-        input.type = 'text';
-        input.autocomplete = 'off';
-        input.enterKeyHint = 'next';
-        input.value = value;
-        input.placeholder = placeholder;
-        input.dataset.index = index;
-        input.dataset.field = field;
-        if (field === 'price') {
-          input.inputMode = 'decimal';
-          input.setAttribute('aria-label', `আইটেম ${index + 1} এর দাম`);
-        } else input.setAttribute('aria-label', `আইটেম ${index + 1} এর নাম`);
+        input.className = field === 'quantity' ? 'qty-input' : 'field' + (field === 'name' ? ' item-name' : '');
+        input.type = 'text'; input.autocomplete = 'off'; input.enterKeyHint = 'next';
+        input.value = value; input.placeholder = placeholder;
+        input.dataset.index = index; input.dataset.field = field;
+        if (field !== 'name') input.inputMode = 'decimal';
+        input.setAttribute('aria-label', `আইটেম ${index + 1} এর ${field === 'name' ? 'নাম' : field === 'price' ? 'দাম' : 'পরিমাণ'}`);
         return input;
       }
       function renderItems(focusIndex = -1) {
         els.items.replaceChildren();
-        const fragment = document.createDocumentFragment();
+        const frag = document.createDocumentFragment();
         state.items.forEach((item, index) => {
-          const row = document.createElement('div');
-          row.className = 'item-row';
-          const bullet = document.createElement('span');
-          bullet.className = 'bullet';
-          bullet.textContent = '•';
-          bullet.setAttribute('aria-hidden', 'true');
-          row.append(bullet, makeInput(item.name, 'পণ্যের নাম / পরিমাণ', 'name', index));
-          const amountWrap = document.createElement('div');
-          amountWrap.className = 'amount-wrap';
-          const priceInput = makeInput(item.price, '০', 'price', index);
-          const currency = document.createElement('span');
-          currency.className = 'currency';
-          currency.textContent = '৳';
-          amountWrap.append(priceInput, currency);
-          row.append(amountWrap);
-          const remove = document.createElement('button');
-          remove.className = 'icon-btn';
-          remove.type = 'button';
-          remove.dataset.remove = index;
-          remove.textContent = '×';
-          remove.title = 'আইটেম মুছুন';
+          const row = document.createElement('div'); row.className = 'item-row';
+          const bullet = document.createElement('span'); bullet.className = 'bullet';
+          bullet.textContent = '•'; bullet.setAttribute('aria-hidden', 'true');
+          row.append(bullet, makeInput(item.name, 'পণ্যের নাম', 'name', index));
+          const stepper = document.createElement('div'); stepper.className = 'quantity-box';
+          stepper.setAttribute('role', 'group'); stepper.setAttribute('aria-label', `আইটেম ${index + 1} এর পরিমাণ`);
+          const makeButton = (text, direction, label) => {
+            const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'qty-btn';
+            btn.dataset.adjust = direction; btn.dataset.index = index; btn.textContent = text;
+            btn.setAttribute('aria-label', `আইটেম ${index + 1} পরিমাণ ${label}`);
+            return btn;
+          };
+          const minus = makeButton('−', '-1', 'কমান');
+          const plus = makeButton('+', '1', 'বাড়ান');
+          const qty = makeInput(item.quantity, '০', 'quantity', index);
+          const unit = document.createElement('select'); unit.className = 'qty-unit';
+          unit.dataset.field = 'unit'; unit.dataset.index = index;
+          unit.setAttribute('aria-label', `আইটেম ${index + 1} এর একক`);
+          ['', 'কেজি', 'গ্রাম', 'লিটার', 'মি.লি.', 'পিস', 'টি'].forEach(value => {
+            const option = document.createElement('option'); option.value = value;
+            option.textContent = value || 'একক'; unit.append(option);
+          });
+          unit.value = item.unit;
+          stepper.append(minus, qty, plus, unit);
+          row.append(stepper);
+          const amount = document.createElement('div'); amount.className = 'amount-wrap';
+          const price = makeInput(item.price, '০', 'price', index);
+          const currency = document.createElement('span'); currency.className = 'currency'; currency.textContent = '৳';
+          amount.append(price, currency); row.append(amount);
+          const remove = document.createElement('button'); remove.type = 'button';
+          remove.className = 'icon-btn remove-btn'; remove.dataset.remove = index;
+          remove.textContent = '×'; remove.title = 'আইটেম মুছুন';
           remove.setAttribute('aria-label', `আইটেম ${index + 1} মুছুন`);
-          row.append(remove);
-          fragment.append(row);
+          row.append(remove); frag.append(row);
         });
-        els.items.append(fragment);
-        updateSummary();
-        if (focusIndex >= 0) {
-          const field = els.items.querySelector(`input[data-index="${focusIndex}"][data-field="name"]`);
-          if (field) field.focus();
-        }
+        els.items.append(frag); updateSummary();
+        if (focusIndex >= 0)
+          els.items.querySelector(`input[data-index="${focusIndex}"][data-field="name"]`)?.focus();
       }
       function showToast(message) {
         els.toast.textContent = message;
@@ -399,10 +468,10 @@
         const total = state.items.reduce((sum, item) =>
           sum + (item.name.trim() ? (getPrice(item.price) ?? 0) : 0), 0);
         const backup = {
-          schemaVersion: 1,
+          schemaVersion: 2,
           owner: state.owner,
           month: state.month,
-          items: state.items.map(item => ({ name: item.name, price: item.price })),
+          items: state.items.map(item => ({name: item.name, quantity: item.quantity, unit: item.unit, price: item.price})),
           total,
           exportedAt: new Date().toISOString()
         };
@@ -423,15 +492,16 @@
         if (file.size > 1024 * 1024) { showToast('ফাইলটি অনেক বড় (সর্বোচ্চ ১ MB)'); return; }
         try {
           const parsed = JSON.parse(await file.text());
-          const valid = parsed && parsed.schemaVersion === 1 &&
+          const valid = parsed && [1, 2].includes(parsed.schemaVersion) &&
             typeof parsed.owner === 'string' && typeof parsed.month === 'string' &&
             Array.isArray(parsed.items) && parsed.items.length <= 500 &&
-            parsed.items.every(item => item && typeof item.name === 'string' && typeof item.price === 'string');
+            parsed.items.every(item => item && typeof item.name === 'string' && typeof item.price === 'string' &&
+              (parsed.schemaVersion === 1 || (typeof item.quantity === 'string' && typeof item.unit === 'string')));
           if (!valid) throw new Error('invalid');
           if (!window.confirm('ইমপোর্ট করলে বর্তমান তালিকা বদলে যাবে। এগোবেন?')) return;
           state = {
             owner: parsed.owner, month: parsed.month,
-            items: parsed.items.map(item => ({ name: item.name, price: item.price }))
+            items: parsed.items.length ? parsed.items.map(normalizeItem) : [blankItem()]
           };
           els.owner.value = state.owner;
           els.month.value = state.month;
@@ -452,65 +522,63 @@
         item[input.dataset.field] = input.value;
         updateSummary();
       });
-      // Keyboard-only entry: item name → price → next item's name.
-      // Keep focus in existing rows when editing older entries, and avoid extra blank rows.
+      // Press Enter: name -> quantity -> price -> next item name.
       els.items.addEventListener('keydown', e => {
         if (e.key !== 'Enter' || e.isComposing || e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
         const input = e.target.closest('input[data-field]');
         if (!input || !els.items.contains(input)) return;
-        const index = Number(input.dataset.index);
-        const item = state.items[index];
+        const index = Number(input.dataset.index), item = state.items[index];
         if (!item) return;
-        e.preventDefault(); // Don't submit a form or dismiss the keyboard.
-        if (input.dataset.field === 'name') {
-          const price = els.items.querySelector(`input[data-index="${index}"][data-field="price"]`);
-          price?.focus();
-          return;
+        e.preventDefault();
+        const focus = (at, field) =>
+          els.items.querySelector(`input[data-index="${at}"][data-field="${field}"]`)?.focus();
+        if (input.dataset.field === 'name') { focus(index, 'quantity'); return; }
+        if (input.dataset.field === 'quantity') { focus(index, 'price'); return; }
+        if (!item.name.trim() && !item.quantity.trim() && !item.price.trim()) {
+          focus(index, 'name'); return;
         }
-        if (!item.name.trim() && !item.price.trim()) {
-          const name = els.items.querySelector(`input[data-index="${index}"][data-field="name"]`);
-          name?.focus();
-          return;
-        }
-        if (index + 1 < state.items.length) {
-          const next = els.items.querySelector(`input[data-index="${index + 1}"][data-field="name"]`);
-          next?.focus();
-          return;
-        }
-        state.items.push({ name: '', price: '' });
-        renderItems(state.items.length - 1);
+        if (index + 1 < state.items.length) { focus(index + 1, 'name'); return; }
+        state.items.push(blankItem()); renderItems(state.items.length - 1);
+      });
+      els.items.addEventListener('change', e => {
+        const select = e.target.closest('select[data-field="unit"]');
+        if (!select) return;
+        const item = state.items[Number(select.dataset.index)];
+        if (item) { item.unit = select.value; updateSummary(); }
       });
       els.items.addEventListener('click', e => {
-        const button = e.target.closest('button[data-remove]');
-        if (!button) return;
-        state.items.splice(Number(button.dataset.remove), 1);
+        const button = e.target.closest('button[data-adjust]');
+        if (button) {
+          const index = Number(button.dataset.index), item = state.items[index];
+          if (!item) return;
+          const current = getQuantity(item.quantity) ?? 0;
+          const step = quantityStep(item.unit);
+          const next = Math.max(0, Math.round((current + Number(button.dataset.adjust) * step) * 1000) / 1000);
+          item.quantity = fmt.format(next);
+          const field = els.items.querySelector(`input[data-index="${index}"][data-field="quantity"]`);
+          if (field) field.value = item.quantity;
+          updateSummary(); return;
+        }
+        const remove = e.target.closest('button[data-remove]');
+        if (!remove) return;
+        state.items.splice(Number(remove.dataset.remove), 1);
+        if (!state.items.length) state.items.push(blankItem());
         renderItems();
       });
-      // Presets only appear as buttons. They never populate a visitor's list until selected.
-      // Reuse an entirely blank row when available; keep all existing entries and prices.
       const presetBox = document.querySelector('.presets-box');
       presetBox.addEventListener('click', e => {
         const button = e.target.closest('button[data-preset]');
         if (!button || !presetBox.contains(button)) return;
-        const name = button.dataset.preset;
-        if (!name) return;
-        let index = state.items.findIndex(item => !item.name.trim() && !item.price.trim());
-        if (index === -1) {
-          index = state.items.length;
-          state.items.push({ name, price: '' });
-        } else {
-          state.items[index].name = name;
-        }
+        const item = normalizeItem({name: button.dataset.preset, price: ''});
+        let index = state.items.findIndex(row => !row.name.trim() && !row.quantity.trim() && !row.price.trim());
+        if (index === -1) { index = state.items.length; state.items.push(item); }
+        else state.items[index] = item;
         renderItems();
-        // On computers the price is ready to type; on mobile stay near chips for multi-tap.
-        if (!window.matchMedia('(pointer: coarse)').matches) {
-          const priceInput = els.items.querySelector(`input[data-index="${index}"][data-field="price"]`);
-          priceInput?.focus();
-        }
+        if (!window.matchMedia('(pointer: coarse)').matches)
+          els.items.querySelector(`input[data-index="${index}"][data-field="price"]`)?.focus();
       });
       els.add.addEventListener('click', () => {
-        state.items.push({ name: '', price: '' });
-        renderItems(state.items.length - 1);
+        state.items.push(blankItem()); renderItems(state.items.length - 1);
       });
       async function handleCopy() {
         const text = copyText();
@@ -530,7 +598,7 @@
       els.newList.addEventListener('click', () => {
         if (!window.confirm('নতুন মাসের জন্য বর্তমান আইটেমগুলো মুছে যাবে। আগে কপি করে রাখুন। এগোবেন?')) return;
         state.month = '';
-        state.items = [{ name: '', price: '' }];
+        state.items = [blankItem()];
         els.month.value = '';
         renderItems();
         els.month.focus();
