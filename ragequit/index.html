@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111214">
+  <meta name="description" content="A very serious engineering post about turning a broken Logitech mouse into an Apex Legends rage quit button.">
+  <meta property="og:title" content="Rage Quit Engineering | sha6a6">
+  <meta property="og:description" content="My aim was questionable. My exit strategy was immaculate.">
+  <meta property="og:type" content="article">
+  <title>RAGE QUIT ENGINEERING — sha6a6</title>
+  <style>
+    :root{color-scheme:dark;--bg:#111214;--panel:#1b1c1d;--soft:#252527;--stroke:#38383a;--ink:#f0ebdf;--muted:#a7a39c;--orange:#ff684b;--lime:#d4f67c;--mono:ui-monospace,Consolas,"Cascadia Code",monospace;--sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;overflow-x:hidden}
+    body:before{content:"";pointer-events:none;position:fixed;inset:0;opacity:.08;background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 83%);z-index:-2}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    a:focus-visible,button:focus-visible{outline:3px solid var(--lime);outline-offset:4px}
+    .shell{max-width:1120px;margin:auto;padding:0 28px}
+    .topline{background:var(--lime);color:#181819;text-align:center;padding:7px 15px;font:700 11px/1.5 var(--mono);letter-spacing:.14em;text-transform:uppercase}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--stroke);padding:25px 0}
+    .brand{font:900 20px/1 var(--mono);letter-spacing:-.08em}.brand span{color:var(--orange)}
+    .nav-links{display:flex;gap:26px;align-items:center;font:700 12px var(--mono);text-transform:uppercase;letter-spacing:.04em}
+    .nav-links a:hover,.article a:hover{text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:5px}
+    .nav-links .github{border:1px solid var(--stroke);border-radius:50px;padding:10px 16px}
+    .hero{padding:90px 0 65px;display:grid;grid-template-columns:1.35fr .65fr;gap:60px;align-items:center}
+    .eyebrow{font:700 12px var(--mono);letter-spacing:.18em;color:var(--lime);text-transform:uppercase}
+    .hero h1{font-size:clamp(66px,9vw,132px);line-height:.82;letter-spacing:-.09em;text-transform:uppercase;margin:24px 0 30px;font-weight:1000}
+    .hero h1 em{font-style:normal;color:var(--orange)}
+    .hero p{font-size:19px;max-width:610px;color:#c7c1b9;line-height:1.55;margin:0 0 32px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:13px 19px;background:var(--orange);color:#171313;border:1px solid var(--orange);border-radius:4px;font:900 12px var(--mono);letter-spacing:.03em;cursor:pointer;transition:transform .15s,background .15s}
+    .button:hover{transform:translateY(-2px);background:#ff8067}
+    .button.secondary{background:transparent;color:var(--ink);border-color:var(--stroke)}
+    .button.secondary:hover{background:var(--soft)}
+    .hero-card{position:relative;border:1px solid #544039;background:linear-gradient(140deg,#30221f,#151719 80%);padding:26px;transform:rotate(2deg);box-shadow:15px 20px 0 #070708;min-height:380px;display:flex;flex-direction:column;justify-content:space-between}
+    .hero-card:before{content:"";width:230px;height:230px;position:absolute;top:24px;left:50%;transform:translateX(-50%);border:22px solid var(--orange);border-radius:50%;opacity:.9;box-shadow:0 0 72px #ff684b33}
+    .hero-card:after{content:"↗";position:absolute;top:32px;right:34px;font:900 96px/1 var(--mono);color:var(--lime);text-shadow:0 0 55px #d4f67c55}
+    .hero-card .sticker{position:relative;z-index:2;align-self:flex-start;background:var(--lime);color:#111;padding:6px 10px;font:900 10px var(--mono);transform:rotate(-5deg)}
+    .hero-card .panic{position:relative;z-index:2;font:1000 clamp(46px,6vw,80px)/.92 var(--sans);letter-spacing:-.09em;text-shadow:4px 5px 0 #111;text-transform:uppercase}
+    .hero-card .micro{position:relative;z-index:2;font:12px var(--mono);color:#e5beac}
+    .ticker{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--stroke);margin:8px 0 82px}
+    .ticker>div{padding:22px 24px;border-right:1px solid var(--stroke)}
+    .ticker>div:last-child{border-right:0}
+    .metric{font:900 31px var(--mono);letter-spacing:-.06em;color:var(--lime)}
+    .metric-label{font:700 11px var(--mono);color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:7px}
+    .content{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:60px;padding-bottom:100px}
+    .article{min-width:0}
+    .meta{font:12px var(--mono);color:var(--muted);margin-bottom:26px;text-transform:uppercase}
+    .article h2{font-size:clamp(32px,5vw,56px);letter-spacing:-.06em;line-height:1.07;margin:0 0 24px}
+    .article h3{font-size:28px;letter-spacing:-.045em;line-height:1.2;margin:54px 0 18px}
+    .article p{color:#c6c4c0;max-width:690px;font-size:17px}
+    .article strong{color:var(--ink)}
+    .article a{text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:4px}
+    .pullquote{margin:42px 0;padding:30px 32px;border-left:4px solid var(--orange);background:#221d1b;font-size:clamp(24px,3vw,34px);font-weight:900;line-height:1.15;letter-spacing:-.045em}
+    .steps{display:grid;gap:12px;margin:26px 0}
+    .step{display:grid;grid-template-columns:50px 1fr;gap:15px;align-items:center;border:1px solid var(--stroke);background:var(--panel);padding:17px 19px}
+    .step .num{font:900 23px var(--mono);color:var(--orange)}
+    .step b{display:block;font-size:15px}
+    .step small{display:block;color:var(--muted);font:12px/1.6 var(--mono)}
+    .codebox{margin:24px 0;background:#070909;border:1px solid #414344;border-radius:6px;overflow:hidden}
+    .codebar{padding:13px 16px;background:#1d2020;border-bottom:1px solid #414344;display:flex;align-items:center;justify-content:space-between;font:11px var(--mono);color:#b6beb8}
+    .dots{display:flex;gap:6px}.dots i{width:8px;height:8px;border-radius:50%;background:#fb685c}.dots i:nth-child(2){background:#ffc14c}.dots i:nth-child(3){background:#b1df85}
+    pre{margin:0;padding:23px;overflow:auto;font:13px/1.9 var(--mono);color:#d9e5d6}
+    .codecomment{color:#8fa18a}.codevar{color:#ff9b81}.codeval{color:#d4f67c}
+    .demo{border:1px solid #5c4a38;background:#241f1a;padding:27px;margin-top:36px}
+    .demo h4{margin:0 0 8px;font-size:23px;letter-spacing:-.04em}
+    .demo p{font-size:14px;margin:0 0 17px}
+    .track{height:8px;background:#3e3630;overflow:hidden;margin:18px 0 13px}
+    .fill{width:0;height:100%;background:var(--lime);transition:width .3s}
+    #demo-output{font:12px/1.8 var(--mono);color:var(--lime);min-height:26px}
+    .aside{align-self:start;position:sticky;top:30px}
+    .note{background:var(--soft);border:1px solid var(--stroke);padding:25px;margin-bottom:16px}
+    .note h4{font:900 13px var(--mono);margin:0 0 12px;text-transform:uppercase;letter-spacing:.03em;color:var(--lime)}
+    .note p{color:#c7c3bc;font-size:14px;margin:0 0 12px}
+    .note p:last-child{margin-bottom:0}
+    .note.warn{border-color:#975443;background:#2a1b1b}
+    .note.warn h4{color:#ff9174}
+    .footer{display:flex;justify-content:space-between;gap:20px;padding:35px 0 50px;border-top:1px solid var(--stroke);font:12px/1.7 var(--mono);color:var(--muted)}
+    .footer b{color:var(--ink)}
+    @media(max-width:900px){.hero{gap:32px;grid-template-columns:1fr}.hero-card{transform:none;min-height:260px;max-width:450px}.content{grid-template-columns:1fr}.aside{position:static;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.ticker{grid-template-columns:repeat(2,1fr)}.ticker>div:nth-child(2){border-right:0}.ticker>div:nth-child(-n+2){border-bottom:1px solid var(--stroke)}}
+    @media(max-width:550px){.shell{padding:0 18px}.nav{padding:17px 0}.nav-links{gap:9px;font-size:10px}.nav-links .github{padding:8px 10px}.hero{padding:70px 0 46px}.hero h1{font-size:clamp(57px,15vw,89px)}.hero p{font-size:16px}.hero-card{min-height:280px}.ticker{margin-bottom:55px}.ticker>div{padding:18px 14px}.metric{font-size:24px}.content{padding-bottom:50px}.aside{display:block}.footer{display:block}.button{width:100%}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+  <div class="topline">Unofficial field report · Apex Legends · November 23, 2026</div>
+  <div class="shell">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="https://latenitekode.github.io/">sha<span>6a6</span> / experiments</a>
+      <div class="nav-links">
+        <a href="#story">The lore</a>
+        <a class="github" href="https://github.com/latenitekode/latenitekode.github.io/tree/main/ragequit">GitHub ↗</a>
+      </div>
+    </nav>
+    <header class="hero">
+      <div>
+        <div class="eyebrow">#001 / engineering an emotional exit</div>
+        <h1>RAGE<br><em>QUIT.</em><br>REPEAT.</h1>
+        <p>My teammates wanted better aim. I built a faster way to leave. A story about a broken Logitech mouse, unnecessary automation, and a VERY necessary 150-millisecond click.</p>
+        <div class="actions">
+          <a class="button" href="./ragequit.lua" download>↓ Get the actual Lua script</a>
+          <a class="button secondary" href="#story">Read the disaster →</a>
+        </div>
+      </div>
+      <div class="hero-card" role="img" aria-label="Decorative emergency exit themed graphic saying tactical emotional extraction">
+        <span class="sticker">WORKS ON MY MACHINE™</span>
+        <div class="panic">TACTICAL<br>EMOTIONAL<br>EXTRACTION</div>
+        <span class="micro">[ ESC ] → [ TAB ] → [ ENTER ] → [ YES ]</span>
+      </div>
+    </header>
+
+    <section class="ticker" aria-label="Completely unserious match statistics">
+      <div><div class="metric">0</div><div class="metric-label">braincells after ranked</div></div>
+      <div><div class="metric">150 ms</div><div class="metric-label">hold to achieve peace</div></div>
+      <div><div class="metric">404</div><div class="metric-label">patience not found</div></div>
+      <div><div class="metric">1 click</div><div class="metric-label">emergency exit plan</div></div>
+    </section>
+
+    <main class="content" id="story">
+      <article class="article">
+        <div class="meta">23 NOV 2026 &nbsp; / &nbsp; 4 MIN READ &nbsp; / &nbsp; CATEGORY: QUESTIONABLE INNOVATIONS</div>
+        <h2>I didn't fix my aim.<br>I automated the aftermath.</h2>
+        <p>There comes a time in every Apex player's life when the squad is gone, the banner is expired, and your motivation is somewhere underneath the dropship. You could navigate the menus like a normal person. Or you could spend an absurd amount of time making a mouse do it for you.</p>
+        <p>Obviously, I chose the second option.</p>
+        <p>The weapon of choice? A <strong>Logitech G102 LIGHTSYNC</strong> whose primary left-click had already given up on life. A cheaper mouse could remember its macros without software. This one needed G HUB, Lua, several experiments, and the kind of patience usually reserved for debugging production databases.</p>
+        <div class="pullquote">“Sometimes the best movement tech is moving back to the lobby.”</div>
+        <h3>The five stages of acceptance</h3>
+        <div class="steps">
+          <div class="step"><span class="num">01</span><div><b>Escape</b><small>Open the pause menu. Begin emotional detachment.</small></div></div>
+          <div class="step"><span class="num">02</span><div><b>Tab</b><small>Select Leave Match. Remember your dignity.</small></div></div>
+          <div class="step"><span class="num">03</span><div><b>Enter</b><small>Open the final confirmation. The game asks if you're sure.</small></div></div>
+          <div class="step"><span class="num">04</span><div><b>MoveMouseTo(29800, 44750)</b><small>Move to YES. Surprisingly, the hardest part.</small></div></div>
+          <div class="step"><span class="num">05</span><div><b>Hold left-click for 150 ms</b><small>The ultimate technological breakthrough: actually clicking the button.</small></div></div>
+        </div>
+        <h3>The bug that humbled me</h3>
+        <p>First, the script listened for the wrong mouse-button number. Then it tried the key name <strong>esc</strong> instead of the G HUB Lua key name <strong>escape</strong>. Then the cursor finally reached YES... and the click wouldn't register. The fix? A slightly longer press.</p>
+        <p>My mouse was broken, my patience was broken, and somehow the code came out working.</p>
+
+        <div class="codebox" aria-label="Configuration excerpt">
+          <div class="codebar"><div class="dots"><i></i><i></i><i></i></div><span>ragequit.lua — the sacred settings</span><span>LUA</span></div>
+          <pre><span class="codecomment">-- G HUB Lua: 2 is RIGHT-CLICK</span>
+<span class="codevar">local TRIGGER_BUTTON</span> = <span class="codeval">2</span>
+<span class="codevar">local YES_X</span> = <span class="codeval">29800</span>
+<span class="codevar">local YES_Y</span> = <span class="codeval">44750</span>
+<span class="codevar">local MOUSE_HOLD_MS</span> = <span class="codeval">150</span>
+<span class="codevar">local ENABLE_FINAL_CLICK</span> = <span class="codeval">true</span>
+
+<span class="codecomment">-- escape, not esc. Yes, it matters.</span>
+TapKey(<span class="codeval">"escape"</span>)</pre>
+        </div>
+        <div class="actions">
+          <a href="./ragequit.lua" class="button" download>↓ Download full commented script</a>
+          <button type="button" class="button secondary" id="copy-btn">Copy Lua to clipboard</button>
+        </div>
+        <p id="copy-message" aria-live="polite" style="font:12px var(--mono);color:var(--lime)"></p>
+
+        <h3>Want to witness the exit?</h3>
+        <p>Press the button below for a dramatic reenactment. It's only a webpage animation. It doesn't touch your game, keyboard, mouse, or dignity.</p>
+        <div class="demo">
+          <h4>Emotional extraction simulator</h4>
+          <p>100% fictional, 0% matchmaking penalties.</p>
+          <button type="button" class="button" id="demo-btn">INITIATE PEACEFUL DISAPPEARANCE</button>
+          <div class="track" aria-hidden="true"><div class="fill" id="demo-fill"></div></div>
+          <div id="demo-output" role="status" aria-live="polite">SYSTEM READY. PATIENCE DEPLETED.</div>
+        </div>
+
+        <h3>Should you actually use this?</h3>
+        <p>If you've ever needed an oddly specific Lua macro, the <a href="./ragequit.lua">fully documented source</a> is yours to inspect and modify. Just remember: the original trigger was literally the <strong>right mouse button</strong>. While active, every right-click starts the sequence, including when you're trying to aim. That's a spectacularly bad surprise in a live match. Change the trigger or disable the script when you're playing.</p>
+        <p>Also, game policies and anti-cheat behavior can change. This is a personal experiment, not a promise that any automated input is permitted or will keep working.</p>
+      </article>
+
+      <aside class="aside" aria-label="Project notes">
+        <div class="note warn">
+          <h4>⚠ The big red flag</h4>
+          <p>The script is configured for literal <strong>right-click</strong>. That means it will trigger on normal aiming if the G HUB profile stays active.</p>
+          <p>Keep it disabled during ordinary gameplay, or rebind it to a dedicated button and test carefully.</p>
+        </div>
+        <div class="note">
+          <h4>Hardware of champions</h4>
+          <p>Mouse: Logitech G102 LIGHTSYNC</p>
+          <p>Screen: 1920 × 1080 primary</p>
+          <p>Software: Logitech G HUB Lua</p>
+          <p>AutoHotkey: Not used</p>
+        </div>
+        <div class="note">
+          <h4>Do it yourself</h4>
+          <p>Download the script, open the G HUB scripting editor, paste and activate it under the correct profile. Turn onboard memory mode off.</p>
+          <p>Set <strong>ENABLE_FINAL_CLICK = false</strong> first if you're recalibrating the YES coordinates.</p>
+          <a href="./README.md" style="color:var(--lime);font:12px var(--mono)">Setup notes ↗</a>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <div>MADE BY <b>sha6a6</b> · powered by frustration and Lua.</div>
+      <div>Not affiliated with EA, Respawn, Logitech or Apex Legends. <a href="https://latenitekode.github.io/">← Back to portfolio</a></div>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      var copyButton=document.getElementById('copy-btn');
+      var copyMessage=document.getElementById('copy-message');
+      copyButton.addEventListener('click',async function(){
+        try{
+          var response=await fetch('./ragequit.lua',{cache:'no-store'});
+          if(!response.ok) throw new Error('Could not fetch Lua source');
+          await navigator.clipboard.writeText(await response.text());
+          copyMessage.textContent='COPIED. GO FORTH AND CONFIGURE RESPONSIBLY.';
+        }catch(error){
+          copyMessage.textContent='COPY FAILED. USE THE DOWNLOAD LINK INSTEAD.';
+        }
+      });
+      var demoButton=document.getElementById('demo-btn');
+      var demoOutput=document.getElementById('demo-output');
+      var demoFill=document.getElementById('demo-fill');
+      var running=false;
+      var stages=[
+        ['ESCAPE SENT. RECONSIDERING LIFE CHOICES.',20],
+        ['TAB SENT. NAVIGATING TOWARD SERENITY.',40],
+        ['ENTER SENT. THE GAME ASKS: ARE YOU SURE?',60],
+        ['CURSOR FOUND YES. IT TOOK AN ENTIRE ENGINEERING SPRINT.',80],
+        ['LEFT CLICK HELD 150ms. WELCOME BACK TO THE LOBBY. 🫡',100]
+      ];
+      function sleep(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
+      demoButton.addEventListener('click',async function(){
+        if(running)return;
+        running=true;demoButton.disabled=true;demoButton.textContent='EXTRACTING...';
+        demoFill.style.width='0%';
+        for(var i=0;i<stages.length;i++){
+          await sleep(620);
+          demoOutput.textContent='> '+stages[i][0];
+          demoFill.style.width=stages[i][1]+'%';
+        }
+        await sleep(500);
+        demoButton.textContent='REPEAT THE DRAMA';
+        demoButton.disabled=false;running=false;
+      });
+    })();
+  </script>
+</body>
+</html>
