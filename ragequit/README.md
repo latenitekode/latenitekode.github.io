@@ -1,39 +1,67 @@
 # Rage Quit Button: Apex Legends Edition
 
-> **One click. Five inputs. Zero emotional damage recovered.**
+> **My aim was questionable. My exit strategy was immaculate.**
+>
+> Update: now I can queue for the next match with the very same broken mouse.
 
-A lovingly over-engineered **Logitech G HUB Lua** macro built for a Logitech G102 LIGHTSYNC with a broken primary left-click. The script automates the Apex Legends *Leave Match* menu sequence.
+A well-commented **Logitech G HUB Lua** controller for the Logitech G102 LIGHTSYNC. The primary left mouse button was broken, so we taught Lua to perform two Apex Legends menu chores for us.
 
-**Blog page:** https://latenitekode.github.io/ragequit/
+**Blog:** https://latenitekode.github.io/ragequit/
 
-## The script
+## Download
 
-Download [ragequit.lua](./ragequit.lua). It runs:
+**[Get the complete, updated ragequit.lua](./ragequit.lua)**
 
-`Right-click -> Escape -> Tab -> Enter -> move cursor to YES -> hold left click for 150 ms`
+## Two actions
 
-The YES location (`YES_X = 29800`, `YES_Y = 44750`) was tuned for a **1920 x 1080 primary display**; multi-monitor configurations may need adjustments.
+| Trigger | Action |
+| --- | --- |
+| **Right-click (Lua button 2)** | Escape -> Tab -> Enter -> move to YES -> hold left-click once |
+| **DPI button (candidate Lua button 6)** | Move to READY -> hold left-click once -> ignore repeat DPI triggers for 4 seconds |
+
+**READY changing to CANCEL means you entered matchmaking.** That is success, not an error. Clicking that button again can cancel the queue. The Lua cooldown helps prevent accidental double triggers, but does not inspect the game to determine whether matchmaking is active.
+
+**DPI compatibility note:** Not every G102 / G HUB configuration exposes the DPI switch as Lua mouse button 6. Inspect G HUB's scripting console to identify the actual event, and change the assigned trigger if necessary.
 
 ## Setup
 
-1. Open **Logitech G HUB** and choose the G102's correct profile.
-2. Turn **On-Board Memory Mode off**.
-3. Open the G HUB Lua scripting editor. Create/activate a script and paste `ragequit.lua`.
-4. Keep G HUB running; the G102 cannot store this advanced Lua behavior in its onboard memory.
-5. Before testing a final click, set `ENABLE_FINAL_CLICK = false`. Verify where the cursor lands. Only then set it back to `true`.
+1. Open **Logitech G HUB** and select your G102's correct profile.
+2. **Disable On-Board Memory Mode** so the software script can run.
+3. Open **Lua Scripting**, paste the entire [ragequit.lua](./ragequit.lua) file, save it, and activate it.
+4. Keep G HUB running. This advanced Lua behavior is not stored on the mouse itself.
+5. Set `ENABLE_FINAL_CLICK = false` first to test cursor positioning; turn it on only after confirming the targets.
+6. Verify that the DPI button logs button 6 (or configure it to generate a detected event). Do **not** also map that button to a separate left-click macro, which may cause an additional click outside Lua's control.
 
-### Make it your own
+## Configuration reference
 
-The top of the Lua file has fully documented values for the trigger, timings, mouse hold duration, and YES coordinates. G HUB uses mouse button **2** for the actual right-click, not 3. For Escape, use `"escape"`, not `"esc"`.
+All values are explained with comments directly in the Lua script.
 
-## Warning (seriously)
+| Setting | Default | Purpose |
+| --- | --- | --- |
+| `LOBBY_TRIGGER` | `2` | Literal right mouse button |
+| `READY_TRIGGER` | `6` | DPI button, if exposed as Lua event 6 |
+| `ENABLE_LOBBY` | `true` | Enable Return to Lobby |
+| `ENABLE_READY` | `true` | Enable the READY action |
+| `ENABLE_FINAL_CLICK` | `true` | Allow the simulated confirmation click |
+| `MOUSE_HOLD_MS` | `150` | Duration of a **single** left-click |
+| `READY_COOLDOWN_MS` | `4000` | Ignore repeated READY triggers for 4 seconds |
+| `YES_X, YES_Y` | `29800, 44750` | Leave Match YES button |
+| `READY_X, READY_Y` | `32768, 58700` | Main lobby READY button |
 
-The shipped trigger is **right-click**, as requested by the original user. That means **any right-click with this G HUB script active starts the entire leave-match sequence**, including while aiming down sights. Disable the script during gameplay or change the trigger to a dedicated button, preferably with an additional safeguard. Test in a noncompetitive context. Automated in-game actions may be subject to game rules or anti-cheat restrictions; no claim of endorsement, compliance, or immunity from enforcement is made.
+The coordinates are **Logitech normalized values (0–65535)**, calibrated using a **1920x1080 primary display**. They are not pixel positions, and multi-monitor setups may need adjustment.
 
-This is a personal experiment, not affiliated with EA, Respawn, Logitech, or Apex Legends.
+Lua's correct Escape key name is `"escape"`, not `"esc"`. Keyboard keys are held for `KEY_HOLD_MS = 100` rather than tapped instantaneously.
+
+## Safety warnings
+
+**The default right-click trigger is also the ADS button in Apex.** That means any right-click while the script is active can run the entire Return to Lobby sequence, including during gameplay. Disable the script during actual matches or change the trigger to a dedicated button.
+
+This script does **not** visually detect the game state, so pressing it on the wrong menu can click something unintended. Its cooldown prevents duplicate Lua triggers for a short interval, **not** every possible duplicate click or network-related queue cancellation.
+
+A personal automation experiment; not affiliated with EA, Respawn, Logitech, or Apex Legends. Follow the game's rules and use carefully.
 
 ## Credits
 
-Made by **sha6a6**. No AutoHotkey, because Apex refuses to launch with it running on the original setup.
+Made by **sha6a6**. No AutoHotkey required. 
 
-**Motto:** Sometimes the fastest movement tech is leaving.
+**Motto:** Sometimes the fastest movement tech is leaving. The second fastest is clicking READY again.
