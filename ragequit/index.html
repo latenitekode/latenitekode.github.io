@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111214">
-  <meta name="description" content="A very serious engineering post about turning a broken Logitech mouse into an Apex Legends rage quit button.">
+  <meta name="description" content="A broken Logitech G102, a one-click Apex rage quit, and now a DPI-powered READY button with a 4-second cooldown.">
   <meta property="og:title" content="Rage Quit Engineering | sha6a6">
-  <meta property="og:description" content="My aim was questionable. My exit strategy was immaculate.">
+  <meta property="og:description" content="My aim was questionable. My exit strategy has a READY button now.">
   <meta property="og:type" content="article">
   <title>RAGE QUIT ENGINEERING — sha6a6</title>
   <style>
@@ -99,7 +99,7 @@
       <div>
         <div class="eyebrow">#001 / engineering an emotional exit</div>
         <h1>RAGE<br><em>QUIT.</em><br>REPEAT.</h1>
-        <p>My teammates wanted better aim. I built a faster way to leave. A story about a broken Logitech mouse, unnecessary automation, and a VERY necessary 150-millisecond click.</p>
+        <p>My teammates wanted better aim. I built a faster way to leave. A story about a broken Logitech mouse, unnecessary automation, a VERY necessary 150-millisecond click, and now a DPI button that queues for the next match.</p>
         <div class="actions">
           <a class="button" href="./ragequit.lua" download>↓ Get the actual Lua script</a>
           <a class="button secondary" href="#story">Read the disaster →</a>
@@ -115,8 +115,8 @@
     <section class="ticker" aria-label="Completely unserious match statistics">
       <div><div class="metric">0</div><div class="metric-label">braincells after ranked</div></div>
       <div><div class="metric">150 ms</div><div class="metric-label">hold to achieve peace</div></div>
-      <div><div class="metric">404</div><div class="metric-label">patience not found</div></div>
-      <div><div class="metric">1 click</div><div class="metric-label">emergency exit plan</div></div>
+      <div><div class="metric">4 sec</div><div class="metric-label">READY cooldown</div></div>
+      <div><div class="metric">2 acts</div><div class="metric-label">exit + queue again</div></div>
     </section>
 
     <main class="content" id="story">
@@ -147,6 +147,11 @@
 <span class="codevar">local YES_Y</span> = <span class="codeval">44750</span>
 <span class="codevar">local MOUSE_HOLD_MS</span> = <span class="codeval">150</span>
 <span class="codevar">local ENABLE_FINAL_CLICK</span> = <span class="codeval">true</span>
+<span class="codecomment">-- Added: DPI button queues you once</span>
+<span class="codevar">local READY_TRIGGER</span> = <span class="codeval">6</span>
+<span class="codevar">local READY_COOLDOWN_MS</span> = <span class="codeval">4000</span>
+<span class="codevar">local READY_X</span> = <span class="codeval">32768</span>
+<span class="codevar">local READY_Y</span> = <span class="codeval">58700</span>
 
 <span class="codecomment">-- escape, not esc. Yes, it matters.</span>
 TapKey(<span class="codeval">"escape"</span>)</pre>
@@ -167,6 +172,14 @@ TapKey(<span class="codeval">"escape"</span>)</pre>
           <div id="demo-output" role="status" aria-live="polite">SYSTEM READY. PATIENCE DEPLETED.</div>
         </div>
 
+        <h3>Update: the DPI button has entered the chat.</h3>
+        <p>Leaving the match is only half the journey. Now the same G102 can move the cursor to <strong>READY</strong> and click it with the DPI button. The script deliberately waits out a <strong>4-second cooldown</strong> before responding to another READY trigger, because clicking the lobby button twice is a great way to cancel your own matchmaking.</p>
+        <div class="steps">
+          <div class="step"><span class="num">06</span><div><b>Press the DPI button</b><small>G HUB Lua button 6, if your configuration exposes it as that event.</small></div></div>
+          <div class="step"><span class="num">07</span><div><b>Move to READY and click once</b><small>MoveMouseTo(32768, 58700), settle 500 ms, hold left-click 150 ms.</small></div></div>
+          <div class="step"><span class="num">08</span><div><b>Ignore repeat triggers for 4 seconds</b><small>READY becomes CANCEL when matchmaking begins. Don't press it again.</small></div></div>
+        </div>
+        <p>The actual <a href="./ragequit.lua">downloadable script</a> contains both actions and every timing value in one commented file. The DPI button may not appear as Lua button 6 on every setup, so check G HUB's console before assuming the trigger is correct.</p>
         <h3>Should you actually use this?</h3>
         <p>If you've ever needed an oddly specific Lua macro, the <a href="./ragequit.lua">fully documented source</a> is yours to inspect and modify. Just remember: the original trigger was literally the <strong>right mouse button</strong>. While active, every right-click starts the sequence, including when you're trying to aim. That's a spectacularly bad surprise in a live match. Change the trigger or disable the script when you're playing.</p>
         <p>Also, game policies and anti-cheat behavior can change. This is a personal experiment, not a promise that any automated input is permitted or will keep working.</p>
@@ -175,7 +188,7 @@ TapKey(<span class="codeval">"escape"</span>)</pre>
       <aside class="aside" aria-label="Project notes">
         <div class="note warn">
           <h4>⚠ The big red flag</h4>
-          <p>The script is configured for literal <strong>right-click</strong>. That means it will trigger on normal aiming if the G HUB profile stays active.</p>
+          <p>The exit action is configured for literal <strong>right-click</strong>. That means it will trigger on normal aiming if the G HUB profile stays active. The DPI READY action should be verified in the scripting console.</p>
           <p>Keep it disabled during ordinary gameplay, or rebind it to a dedicated button and test carefully.</p>
         </div>
         <div class="note">
@@ -188,7 +201,7 @@ TapKey(<span class="codeval">"escape"</span>)</pre>
         <div class="note">
           <h4>Do it yourself</h4>
           <p>Download the script, open the G HUB scripting editor, paste and activate it under the correct profile. Turn onboard memory mode off.</p>
-          <p>Set <strong>ENABLE_FINAL_CLICK = false</strong> first if you're recalibrating the YES coordinates.</p>
+          <p>Set <strong>ENABLE_FINAL_CLICK = false</strong> first if you're recalibrating the YES or READY coordinates. READY changing to CANCEL means the queue started.</p>
           <a href="./README.md" style="color:var(--lime);font:12px var(--mono)">Setup notes ↗</a>
         </div>
       </aside>
