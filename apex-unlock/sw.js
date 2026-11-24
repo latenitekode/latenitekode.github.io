@@ -1,5 +1,5 @@
 // Scoped offline cache; never intercept other projects on the same domain.
-const CACHE="legend-ledger-v1.1", PREFIX="legend-ledger-";
+const CACHE="legend-ledger-v1.1.1", PREFIX="legend-ledger-";
 const root=new URL("./",self.location.href), index=new URL("index.html",root).href;
 const assets=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png"].map(x=>new URL(x,root).href);
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(assets)).then(()=>self.skipWaiting())));
